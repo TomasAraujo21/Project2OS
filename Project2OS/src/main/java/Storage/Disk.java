@@ -73,5 +73,58 @@ public class Disk {
         }
     }
     
+    public void markasFree(int block){
+        if(block >= 0 && block < this.getBusy().length){
+            this.getBusy()[block] = false;
+            System.out.println("Bloque"+block+"marcado como libre");
+        } else {
+            System.out.println("Índice de bloque inválido:" + block);
+        }
+    }
+    public void markasBusy(int block){
+        if(block >= 0 && block < this.getBusy().length){
+            busy[block] = true;
+        }else{
+            System.out.println("Indice fuera de rango");
+        }
+    }
+    
+    public void setBusy(boolean[] busystatus){
+        if (busystatus != null && busystatus.length == busy.length){
+            System.arraycopy(busystatus, 0, this.busy, 0, busystatus.length);
+        } else {
+            System.out.println("El tamaño del estado ocupado no coincide.");
+        }
+    }
+    
+    public boolean getStorage(int amount){
+        return amount <= freeBlocks;
+    }
+    
+    public int getTotalBlocks(){
+        return blocks.length;
+    }
+
+    public Block[] getBlocks() {
+        return blocks;
+    }
+
+    public void setBlocks(Block[] blocks) {
+        this.blocks = blocks;
+    }
+
+    public boolean[] getBusy() {
+        return busy;
+    }
+    public int getFreeBlocks() {
+        return freeBlocks;
+    }
+
+    public void setFreeBlocks(int freeBlocks) {
+        this.freeBlocks = freeBlocks;
+    }
+    
+    
+    
    
 }
