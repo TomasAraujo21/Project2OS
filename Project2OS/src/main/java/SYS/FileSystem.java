@@ -18,9 +18,9 @@ public class FileSystem {
     private Audit audit;
 
     public FileSystem(int sizeDisk, Audit audit) {
-        this.root = new Directory ("Raiz", audit,null);
         this.disk = new Disk(sizeDisk);
         this.audit = audit;
+        this.root = new Directory ("Raiz", audit, null, disk);
     }
     
     public Directory getRoot() {                      
@@ -103,4 +103,11 @@ public class FileSystem {
         return file;
     }
     
+    public Directory addDirectory(String name, Directory parent, String user) {
+        Directory newDir = new Directory(name, audit, parent, disk);
+        parent.addDirectory(newDir);
+
+        audit.registerOperation(user, "Directorio creado: " + newDir.getRute());
+        return newDir;
+    }
 }
