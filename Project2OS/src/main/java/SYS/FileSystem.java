@@ -5,18 +5,7 @@
 package SYS;
 import Audit.Audit;
 import Storage.Disk;
-import DS.LinkedList;
-import DS.Node;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import java.io.File;
-import java.lang.reflect.Type;
 
 
 /**
@@ -34,13 +23,84 @@ public class FileSystem {
         this.audit = audit;
     }
     
-    public void addFile(String name, int size, String color, String ruteDirectory){
-        if(!disk.getStorage(size)){
+    public Directory getRoot() {                      
+        return root;
+    }
+
+    public Disk getDisk() {                           
+        return disk;
+    }
+
+    public Audit getAudit() {                         
+        return audit;
+    }
+
+    public MyFile createFile(Directory targetDir,
+                             String name,
+                             int sizeBlocks,
+                             String color,
+                             String user) {
+
+        if (!disk.getStorage(sizeBlocks)) {
             System.out.println("No hay espacio suficiente en el disco");
-            JOptionPane.showMessageDialog(null, "No hay espacio suficiente en el disco", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            JOptionPane.showMessageDialog(
+                null,
+                "No hay espacio suficiente en el disco",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return null;
         }
+
+        int firstBlock = disk.asignBlocks(sizeBlocks);
+        if (firstBlock == -1) {
+            System.out.println("Error al asignar bloques.");
+            JOptionPane.showMessageDialog(
+                null,
+                "Error al asignar bloques en el disco",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return null;
+        }
+
+        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color);
+
+        targetDir.addFile(file, user);
+
+        return file;
     }
     
+    public MyFile addFile(String name, int sizeBlocks, String color, Directory targetDir, String user) {
+        // Verificar espacio en el disco
+        if (!disk.getStorage(sizeBlocks)) {
+            System.out.println("No hay espacio suficiente en el disco");
+            JOptionPane.showMessageDialog(null,
+                    "No hay espacio suficiente en el disco",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        // Pedir al disco que asigne bloques encadenados
+        int firstBlock = disk.asignBlocks(sizeBlocks);
+        if (firstBlock == -1) {
+            System.out.println("Fallo en asignación de bloques");
+            JOptionPane.showMessageDialog(null,
+                    "Error al asignar bloques en el disco",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        // Crear el archivo lógico
+        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color);
+
+        // Agregar el archivo al directorio y registrar en auditoría
+        if (targetDir == null) {
+            targetDir = root;
+        }
+        targetDir.addFile(file, user);
+
+        return file;
+    }
     
 }

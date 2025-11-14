@@ -3,25 +3,30 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Interfaces;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
+
+import Audit.Audit;
+import SYS.*;
+import DS.*;
+import Config.AppContext;
 
 /**
  *
  * @author 58414
  */
 public class MainFrame extends javax.swing.JFrame {
+    private final FileSystem fileSystem;
+    private final Audit audit;
+    private final TreeManager treeManager;
+
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
+        this.fileSystem = AppContext.FILE_SYSTEM;
+        this.audit = AppContext.AUDIT;
+        this.treeManager = AppContext.TREE_MANAGER;
+
         initComponents();
     }
 
@@ -108,9 +113,11 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Admin admin = new Admin();
+
+        Admin adminWindow = new Admin(fileSystem, fileSystem.getRoot(), audit, treeManager);
+        adminWindow.setLocationRelativeTo(this);
+        adminWindow.setVisible(true);
         this.setVisible(false);
-        admin.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**

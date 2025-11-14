@@ -3,9 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Interfaces;
-import javax.swing.* ;
+
+import javax.swing.*;
+import javax.swing.tree.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import SYS.*;
+import Audit.Audit;
+import DS.*;
 
 /**
  *
@@ -13,11 +18,25 @@ import java.awt.*;
  */
 public class Admin extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Admin
-     */
-    public Admin() {
+    private final FileSystem fileSystem;
+    private Directory currentDirectory;
+    private Directory selectedDirectory;
+    private final Audit audit;
+    private TreeManager treeManager;
+
+    public Admin(FileSystem fileSystem, Directory startDir, Audit audit, TreeManager treeManager) {
+        this.fileSystem = fileSystem;
+        this.currentDirectory = startDir;
+        this.audit = audit;
+        this.treeManager = treeManager;
+
         initComponents();
+
+        this.treeManager = new TreeManager(fileSystem);
+        audit = new Audit(new LinkedList<String>());
+        currentDirectory = treeManager.getSelectedDirectory();
+        FileSystem fs = new FileSystem(100, audit);
+        treeManager.buildTree();
     }
 
     /**
@@ -36,9 +55,8 @@ public class Admin extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         nameFile = new javax.swing.JTextField();
-        colorFile = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        dirButton = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
@@ -47,6 +65,7 @@ public class Admin extends javax.swing.JFrame {
         newNameFile = new javax.swing.JTextField();
         jButton6 = new javax.swing.JButton();
         sizeFile = new javax.swing.JSpinner();
+        colorCmb = new javax.swing.JComboBox<>();
         jPanel3 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
@@ -63,6 +82,7 @@ public class Admin extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton11 = new javax.swing.JButton();
         jButton12 = new javax.swing.JButton();
+        showTree = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -88,7 +108,12 @@ public class Admin extends javax.swing.JFrame {
         jLabel6.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
         jLabel6.setText("Eliminar archivo");
 
-        jButton2.setText("Seleccionar directorio");
+        dirButton.setText("Seleccionar directorio");
+        dirButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dirButtonActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Crear archivo");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -119,6 +144,13 @@ public class Admin extends javax.swing.JFrame {
             }
         });
 
+        colorCmb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Azul", "Rojo", "Amarillo", "Verde" }));
+        colorCmb.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                colorCmbActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -146,23 +178,25 @@ public class Admin extends javax.swing.JFrame {
                         .addGap(87, 87, 87))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addGroup(jPanel2Layout.createSequentialGroup()
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(colorFile, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(71, 71, 71)
-                                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE))
-                                .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                         .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
                                         .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(colorCmb, 0, 177, Short.MAX_VALUE)
                                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(nameFile, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
-                                        .addComponent(sizeFile))
-                                    .addGap(59, 59, 59)
-                                    .addComponent(jButton2)))
+                                        .addComponent(sizeFile)))
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addGap(59, 59, 59)
+                                        .addComponent(dirButton))
+                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addGap(33, 33, 33)
+                                        .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, 187, Short.MAX_VALUE))))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -181,7 +215,7 @@ public class Admin extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(nameFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2))
+                    .addComponent(dirButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
@@ -189,8 +223,8 @@ public class Admin extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(colorFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3))
+                    .addComponent(jButton3)
+                    .addComponent(colorCmb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -303,9 +337,9 @@ public class Admin extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel11)
                 .addGap(18, 18, 18)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton8)
-                    .addComponent(jButton9))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton9)
+                    .addComponent(jButton8))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel12)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -320,7 +354,7 @@ public class Admin extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel1.setText("Modo Administrador");
 
-        jButton1.setText("Cambiar a modo usuario");
+        jButton1.setText("Cambiar Modo");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -330,6 +364,13 @@ public class Admin extends javax.swing.JFrame {
         jButton11.setText("Cargar versiones");
 
         jButton12.setText("Ver bloques");
+
+        showTree.setText("Ver Sistema");
+        showTree.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showTreeActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -342,19 +383,22 @@ public class Admin extends javax.swing.JFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(26, 26, 26))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(204, 204, 204)
+                .addComponent(jButton11, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(115, 115, 115)
+                .addComponent(showTree)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton12, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(147, 147, 147))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(377, 377, 377))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(406, 406, 406))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton11, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(98, 98, 98)
-                        .addComponent(jButton12, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(268, 268, 268))))
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(401, 401, 401))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -368,10 +412,11 @@ public class Admin extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton11)
-                    .addComponent(jButton12))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
+                    .addComponent(jButton12)
+                    .addComponent(showTree))
+                .addGap(18, 18, 18)
                 .addComponent(jButton1)
-                .addGap(22, 22, 22))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -389,29 +434,54 @@ public class Admin extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        User user = new User();
+        MainFrame main = new MainFrame();
         this.setVisible(false);
-        user.setVisible(true);
+        main.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         String name = nameFile.getText().toUpperCase().strip();
-        Integer size = ((Number) sizeFile.getValue()).intValue();
-        String color = colorFile.getText().toUpperCase().strip();
         if (name.isEmpty()) {
             // Validación para que el nombre no sea vacío.
             javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
             return;
         }
-        if (color.isEmpty()) {
-            // Validación para que el nombre no sea vacío.
-            javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un color.");
+
+        int size = 0;
+        try {
+            size = ((Number) sizeFile.getValue()).intValue();
+        } catch (ClassCastException e) {
+            JOptionPane.showMessageDialog(this, "El tamaño debe ser un número entero");
             return;
         }
-        
-        if (size < 0) {
-            javax.swing.JOptionPane.showMessageDialog(this, "La cantidad de instrucciones del proceso debe ser mayor de 0.");
+        if (size <= 0) {
+            JOptionPane.showMessageDialog(this, "El tamaño en bloques debe ser mayor que 0");
             return;
+        }
+
+        String color = colorCmb.toString().toUpperCase().strip();
+        if (color.isEmpty()) {
+            // Validación para que el color no sea vacío.
+            javax.swing.JOptionPane.showMessageDialog(this, "Escoge un color.");
+            return;
+        }
+
+        Directory target = selectedDirectory;
+        String user = System.getProperty("user.name");
+
+        MyFile file = fileSystem.addFile(name, size, color, target, user);
+
+        if (file != null) {
+            JOptionPane.showMessageDialog(this,
+                    "Archivo creado correctamente",
+                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+            // Refrescar JTree
+            treeManager.refresh();
+
+            // Limpiar campos
+            nameFile.setText("");
+            sizeFile.setValue(1);
         }
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -420,7 +490,7 @@ public class Admin extends javax.swing.JFrame {
     }//GEN-LAST:event_nameFileActionPerformed
 
     private void newNameFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newNameFileActionPerformed
-        
+
     }//GEN-LAST:event_newNameFileActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
@@ -439,7 +509,7 @@ public class Admin extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
             return;
         }
-     
+
     }//GEN-LAST:event_jButton10ActionPerformed
 
     private void newDirectoryNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newDirectoryNameActionPerformed
@@ -447,7 +517,7 @@ public class Admin extends javax.swing.JFrame {
     }//GEN-LAST:event_newDirectoryNameActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-       String nameDir = directoryName.getText().toUpperCase().strip();
+        String nameDir = directoryName.getText().toUpperCase().strip();
         if (nameDir.isEmpty()) {
             // Validación para que el nombre no sea vacío.
             javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
@@ -458,6 +528,51 @@ public class Admin extends javax.swing.JFrame {
     private void directoryNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_directoryNameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_directoryNameActionPerformed
+
+    private void showTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showTreeActionPerformed
+        // TODO add your handling code here:
+        treeManager.refresh();
+        treeManager.showTree();
+    }//GEN-LAST:event_showTreeActionPerformed
+
+    private void colorCmbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_colorCmbActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_colorCmbActionPerformed
+
+    private void dirButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dirButtonActionPerformed
+        // TODO add your handling code here:
+        System.out.println("[Admin] Botón seleccionar directorio presionado.");
+
+        // Construye el árbol actualizado
+        treeManager.refresh();
+
+        // Muestra la ventana con el JTree
+        treeManager.showTree();
+
+        // IMPORTANTE:
+        // No podemos obtener la selección inmediatamente, porque el usuario debe hacer clic antes.
+        // Usamos un timer que revisa si ya escogieron algo.
+        Timer checkSelection = new Timer(300, null);
+        checkSelection.addActionListener(e -> {
+            Directory dir = treeManager.getSelectedDirectory();
+            if (dir != null) {
+                selectedDirectory = dir;
+                System.out.println("[Admin] Directorio seleccionado: " + dir.getRute());
+
+                // Mostramos visualmente la elección
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Directorio seleccionado:\n" + dir.getRute(),
+                        "Directorio elegido",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                checkSelection.stop();
+            }
+        });
+
+        checkSelection.start();
+    }//GEN-LAST:event_dirButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -487,21 +602,21 @@ public class Admin extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Admin().setVisible(true);
-            }
-        });
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new Admin().setVisible(true);
+//            }
+//        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField colorFile;
+    private javax.swing.JComboBox<String> colorCmb;
+    private javax.swing.JButton dirButton;
     private javax.swing.JTextField directoryName;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
     private javax.swing.JButton jButton12;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
@@ -528,6 +643,7 @@ public class Admin extends javax.swing.JFrame {
     private javax.swing.JTextField nameFile;
     private javax.swing.JTextField newDirectoryName;
     private javax.swing.JTextField newNameFile;
+    private javax.swing.JButton showTree;
     private javax.swing.JSpinner sizeFile;
     // End of variables declaration//GEN-END:variables
 }

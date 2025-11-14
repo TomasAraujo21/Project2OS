@@ -13,7 +13,7 @@ import Storage.Disk;
  */
 public class Directory {
     private String name;
-    private LinkedList<File> files;
+    private LinkedList<MyFile> files;
     private LinkedList<Directory> subdirectories;
     private Disk refDisk; 
     private Audit refAudit;
@@ -27,7 +27,7 @@ public class Directory {
         this.father = father;
     }
     
-    public void addFile(File file,String user){
+    public void addFile(MyFile file,String user){
         files.add(file);
         System.out.println("Archivo creado:" + file.getName());
         refAudit.registerOperation(user, "SE CREO EL ARCHIVO" + file.getName() + "en el directorio" + this.name);
@@ -39,13 +39,13 @@ public class Directory {
         refAudit.registerOperation("Usuario", "Directorio creado:" + directory.getName());
     }
 
-    public boolean deleteFile(File file, String user){
+    public boolean deleteFile(MyFile file, String user){
         System.out.println("Aechivo" + file.getName() + "eliminado del directorio" + this.name);
         refAudit.registerOperation(user, "Se elimino el archivo" + file.getName() + "del directorio" + this.name);
         return files.remove(file);
     }
     
-    public File getFirstFile(){
+    public MyFile getFirstFile(){
         if (files == null || files.getHead() == null){
             return null;
         }
@@ -78,11 +78,11 @@ public class Directory {
         this.name = name;
     }
 
-    public LinkedList<File> getFiles() {
+    public LinkedList<MyFile> getFiles() {
         return files;
     }
 
-    public void setFiles(LinkedList<File> files) {
+    public void setFiles(LinkedList<MyFile> files) {
         this.files = files;
     }
 
@@ -116,6 +116,11 @@ public class Directory {
 
     public void setFather(Directory father) {
         this.father = father;
+    }
+    
+    @Override
+    public String toString() {
+        return name;
     }
     
     
