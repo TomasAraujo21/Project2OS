@@ -34,8 +34,7 @@ public class Admin extends javax.swing.JFrame {
 
         this.treeManager = new TreeManager(fileSystem);
         audit = new Audit(new LinkedList<String>());
-        currentDirectory = treeManager.getSelectedDirectory();
-        FileSystem fs = new FileSystem(100, audit);
+        currentDirectory = fileSystem.getRoot();
         treeManager.buildTree();
     }
 
@@ -70,7 +69,7 @@ public class Admin extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         directoryName = new javax.swing.JTextField();
-        jButton7 = new javax.swing.JButton();
+        createDir = new javax.swing.JButton();
         jLabel11 = new javax.swing.JLabel();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
@@ -255,10 +254,10 @@ public class Admin extends javax.swing.JFrame {
             }
         });
 
-        jButton7.setText("Crear directorio");
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
+        createDir.setText("Crear directorio");
+        createDir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
+                createDirActionPerformed(evt);
             }
         });
 
@@ -307,7 +306,7 @@ public class Admin extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(21, 21, 21)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton7)
+                            .addComponent(createDir)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -333,7 +332,7 @@ public class Admin extends javax.swing.JFrame {
                     .addComponent(jLabel10)
                     .addComponent(directoryName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton7)
+                .addComponent(createDir)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel11)
                 .addGap(18, 18, 18)
@@ -460,12 +459,7 @@ public class Admin extends javax.swing.JFrame {
         }
 
         String color = colorCmb.toString().toUpperCase().strip();
-        if (color.isEmpty()) {
-            // Validación para que el color no sea vacío.
-            javax.swing.JOptionPane.showMessageDialog(this, "Escoge un color.");
-            return;
-        }
-
+ 
         Directory target = selectedDirectory;
         String user = System.getProperty("user.name");
 
@@ -516,14 +510,31 @@ public class Admin extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_newDirectoryNameActionPerformed
 
-    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+    private void createDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createDirActionPerformed
         String nameDir = directoryName.getText().toUpperCase().strip();
         if (nameDir.isEmpty()) {
             // Validación para que el nombre no sea vacío.
             javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
             return;
         }
-    }//GEN-LAST:event_jButton7ActionPerformed
+
+        // Crear directorio
+        Directory parent = null;
+        parent = currentDirectory;
+        if (parent == null) {
+            parent = fileSystem.getRoot();
+        }
+        Directory newDir = fileSystem.addDirectory(nameDir, currentDirectory, System.getProperty("user.name"));
+        
+        // Actualizar el JTree
+        treeManager.refresh();
+
+        JOptionPane.showMessageDialog(this, "Directorio '" + nameDir + "' creado con éxito.");
+
+        // Limpiar el campo
+        directoryName.setText("");
+        
+    }//GEN-LAST:event_createDirActionPerformed
 
     private void directoryNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_directoryNameActionPerformed
         // TODO add your handling code here:
@@ -543,15 +554,9 @@ public class Admin extends javax.swing.JFrame {
         // TODO add your handling code here:
         System.out.println("[Admin] Botón seleccionar directorio presionado.");
 
-        // Construye el árbol actualizado
         treeManager.refresh();
-
-        // Muestra la ventana con el JTree
         treeManager.showTree();
 
-        // IMPORTANTE:
-        // No podemos obtener la selección inmediatamente, porque el usuario debe hacer clic antes.
-        // Usamos un timer que revisa si ya escogieron algo.
         Timer checkSelection = new Timer(300, null);
         checkSelection.addActionListener(e -> {
             Directory dir = treeManager.getSelectedDirectory();
@@ -559,13 +564,7 @@ public class Admin extends javax.swing.JFrame {
                 selectedDirectory = dir;
                 System.out.println("[Admin] Directorio seleccionado: " + dir.getRute());
 
-                // Mostramos visualmente la elección
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Directorio seleccionado:\n" + dir.getRute(),
-                        "Directorio elegido",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this,"Directorio seleccionado:\n" + dir.getRute(),"Directorio elegido",JOptionPane.INFORMATION_MESSAGE);
 
                 checkSelection.stop();
             }
@@ -611,6 +610,7 @@ public class Admin extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> colorCmb;
+    private javax.swing.JButton createDir;
     private javax.swing.JButton dirButton;
     private javax.swing.JTextField directoryName;
     private javax.swing.JButton jButton1;
@@ -621,7 +621,6 @@ public class Admin extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
     private javax.swing.JLabel jLabel1;

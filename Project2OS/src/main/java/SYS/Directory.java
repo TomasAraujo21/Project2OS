@@ -19,12 +19,13 @@ public class Directory {
     private Audit refAudit;
     private transient Directory father;
 
-    public Directory(String name, Audit refAudit, Directory father) {
+    public Directory(String name, Audit refAudit, Directory father, Disk refDisk) {
         this.name = name;
         this.files = new LinkedList<>();
         this.subdirectories = new LinkedList<>();
         this.refAudit = refAudit;
         this.father = father;
+        this.refDisk = refDisk;
     }
     
     public void addFile(MyFile file,String user){
