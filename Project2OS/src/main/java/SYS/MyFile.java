@@ -8,13 +8,13 @@ package SYS;
  *
  * @author Gabriel Flores
  */
-public class File {
+public class MyFile {
     private String name;
     private int size;
     private int firstBlock;
     private String color;
 
-    public File(String name, int size, int firstBlock, String color) {
+    public MyFile(String name, int size, int firstBlock, String color) {
         this.name = name;
         this.size = size;
         this.firstBlock = firstBlock;
@@ -53,6 +53,8 @@ public class File {
         this.color = color;
     }
     
-    
-    
+    @Override
+    public String toString() {
+        return name;
+    }
 }

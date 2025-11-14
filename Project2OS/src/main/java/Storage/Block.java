@@ -11,18 +11,18 @@ package Storage;
 public class Block {
     private int id;
     private Block next;
-    private boolean busy;
+//    private boolean busy;
 
     public Block (int id){
         this.id = id;
         this.next = null;
     }
     
-    public Block(int id, int nextBlock, boolean busy) {
-        this.id = id;
-        this.next.id = nextBlock;
-        this.busy = busy;
-    }
+//    public Block(int id, int nextBlock, boolean busy) {
+//        this.id = id;
+//        this.next.id = nextBlock;
+//        this.busy = busy;
+//    }
 
     public int getId() {
         return id;
@@ -40,14 +40,14 @@ public class Block {
         this.next = next;
     }
 
-    public boolean isBusy() {
-        return busy;
-    }
-
-    public void setBusy(boolean busy) {
-        this.busy = busy;
-    }
-    
+//    public boolean isBusy() {
+//        return busy;
+//    }
+//
+//    public void setBusy(boolean busy) {
+//        this.busy = busy;
+//    }
+//    
     
     
 }

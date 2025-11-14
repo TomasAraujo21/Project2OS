@@ -4,12 +4,14 @@
  */
 package Interfaces;
 
+
 /**
  *
  * @author 58414
  */
 public class User extends javax.swing.JFrame {
-
+    
+    private TreeManager treeManager;
     /**
      * Creates new form User
      */
@@ -55,9 +57,14 @@ public class User extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel1.setText("Modo Usuario");
 
-        jButton1.setText("Visualizar");
+        jButton1.setText("Ver Sistema");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Cambiar a modo administrador");
+        jButton2.setText("Escoger Modo");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -221,10 +228,16 @@ public class User extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Admin admin = new Admin();
+        MainFrame main = new MainFrame();
         this.setVisible(false);
-        admin.setVisible(true);
+        main.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        treeManager.refresh();
+        treeManager.showTree();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments

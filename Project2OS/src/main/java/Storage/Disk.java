@@ -73,7 +73,7 @@ public class Disk {
         }
     }
     
-    public void markasFree(int block){
+    public void markAsFree(int block){
         if(block >= 0 && block < this.getBusy().length){
             this.getBusy()[block] = false;
             System.out.println("Bloque"+block+"marcado como libre");
@@ -81,7 +81,7 @@ public class Disk {
             System.out.println("Índice de bloque inválido:" + block);
         }
     }
-    public void markasBusy(int block){
+    public void markAsBusy(int block){
         if(block >= 0 && block < this.getBusy().length){
             busy[block] = true;
         }else{
