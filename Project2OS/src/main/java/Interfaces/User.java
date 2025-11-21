@@ -4,14 +4,22 @@
  */
 package Interfaces;
 
+import Process.Process;
+import Clock.ClockManager;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
- * @author 58414
+ * @author Gabriel Flores
  */
 public class User extends javax.swing.JFrame {
     
     private TreeManager treeManager;
+    private static final String CPU_BOUND = "CPU bound";
+    private static final String IO_BOUND  = "I/O bound";
+    private static ClockManager clockManager;
+    private final AtomicInteger nextId = new AtomicInteger(1);
+
     /**
      * Creates new form User
      */
@@ -35,17 +43,17 @@ public class User extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
-        jButton3 = new javax.swing.JButton();
+        createProcess = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        nameProcess = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
+        instructionCount = new javax.swing.JSpinner();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jSpinner3 = new javax.swing.JSpinner();
-        jSpinner4 = new javax.swing.JSpinner();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cycles1 = new javax.swing.JSpinner();
+        cycles2 = new javax.swing.JSpinner();
+        types = new javax.swing.JComboBox<>();
         jButton4 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel4 = new javax.swing.JPanel();
@@ -73,9 +81,20 @@ public class User extends javax.swing.JFrame {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Crear proceso", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
-        jButton3.setText("Crear proceso");
+        createProcess.setText("Crear proceso");
+        createProcess.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                createProcessActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("Nombre:");
+
+        nameProcess.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nameProcessActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("Instrucciones:");
 
@@ -85,9 +104,14 @@ public class User extends javax.swing.JFrame {
 
         jLabel7.setText("Ciclos para satisfacer la exepción:");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "CPU bound", "I/O bound" }));
+        types.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "CPU bound", "I/O bound" }));
 
-        jButton4.setText("Crear 2 procesos");
+        jButton4.setText("Crear 10 procesos");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -99,30 +123,30 @@ public class User extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(types, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSpinner3)
-                            .addComponent(jSpinner4)))
+                            .addComponent(cycles1)
+                            .addComponent(cycles2)))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(instructionCount, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(nameProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(355, 355, 355))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(118, 118, 118)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(createProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(52, 52, 52)
                         .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -134,25 +158,25 @@ public class User extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(nameProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(instructionCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(types, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cycles1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(jSpinner4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cycles2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jButton3)
+                .addComponent(createProcess)
                 .addGap(18, 18, 18)
                 .addComponent(jButton4)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -239,6 +263,101 @@ public class User extends javax.swing.JFrame {
         treeManager.showTree();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void createProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createProcessActionPerformed
+        
+        int pID = nextId.getAndIncrement();
+        String name = nameProcess.getText().toUpperCase().strip();
+        String instructionsCounter = instructionCount.getValue().toString();
+        Integer exceptionCycle = ((Number) cycles1.getValue()).intValue();
+        Integer cyclesToCompleteRequest = ((Number) cycles2.getValue()).intValue();
+        String type = (String) types.getSelectedItem().toString();
+        
+        if (name.isEmpty()) {
+            // Validación para que el nombre no sea vacío.
+            javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
+            return;
+        }
+
+        Integer instructionCounter = ((Number) instructionCount.getValue()).intValue();
+        if (instructionCounter < 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "La cantidad de instrucciones del proceso debe ser mayor de 0.");
+            return;
+        }
+        
+        boolean isIO = IO_BOUND.equals(type);
+        if (isIO) {
+            if (exceptionCycle <= 0) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Para I/O-bound, 'ciclos para generar E/S' debe ser > 0.");
+                return;
+            }
+            if (cyclesToCompleteRequest < 0) {
+                javax.swing.JOptionPane.showMessageDialog(this, "La duración de E/S no puede ser negativa.");
+                return;
+            }
+        } else {
+            exceptionCycle = 0;
+            cyclesToCompleteRequest = 0;
+ 
+        }
+        
+        boolean CPUbound = !isIO;
+        boolean IObound = isIO;
+        int arrivalTime = clockManager.getClockCycles();
+        
+        Process process = new Process(
+            pID, name,
+            instructionCounter, instructionCounter,
+            CPUbound, IObound,
+            exceptionCycle, cyclesToCompleteRequest,
+            Process.Status.Ready,
+            0, 0,
+            0,
+            null,
+            arrivalTime,
+            0.0);
+        process.start();
+        
+        
+        nameProcess.setText("");
+        instructionCount.setValue(1);
+        types.setSelectedItem(CPU_BOUND);
+        cycles1.setValue(1);
+        cycles2.setValue(2);
+        cycles1.setEnabled(false);
+        cycles2.setEnabled(false);
+    }//GEN-LAST:event_createProcessActionPerformed
+
+    private void nameProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameProcessActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_nameProcessActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        for (int i=1; i<11; i++) {
+            int pId = i;
+            String name = "Proceso " + Integer.toString(i);
+            int instructionCount = 8;
+            boolean type = (i%2 == 0) ? true : false;
+            Integer cyclesToExcept = 0;
+            Integer cyclesToCompleteRequest = 0;
+            if (type) {
+                cyclesToExcept = 3;
+                cyclesToCompleteRequest = 2;
+             
+            } else {
+            }
+            boolean CPUbound = !type;
+            boolean IObound = type;
+            int arrivalTime = clockManager.getClockCycles();
+
+            Process process = new Process(pId, name,
+                instructionCount, instructionCount,
+                CPUbound, IObound,
+                cyclesToExcept, cyclesToCompleteRequest,
+                Process.Status.Ready, 0, 0, 0, null, arrivalTime, 0.0);
+            
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -275,11 +394,13 @@ public class User extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton createProcess;
+    private javax.swing.JSpinner cycles1;
+    private javax.swing.JSpinner cycles2;
+    private javax.swing.JSpinner instructionCount;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -291,10 +412,8 @@ public class User extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
-    private javax.swing.JSpinner jSpinner3;
-    private javax.swing.JSpinner jSpinner4;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField nameProcess;
+    private javax.swing.JComboBox<String> types;
     // End of variables declaration//GEN-END:variables
 }
