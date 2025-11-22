@@ -28,6 +28,7 @@ public class MainFrame extends javax.swing.JFrame {
         this.treeManager = AppContext.TREE_MANAGER;
 
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -109,13 +110,14 @@ public class MainFrame extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         User user = new User();
         this.setVisible(false);
+        user.setLocationRelativeTo(null);
         user.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
         Admin adminWindow = new Admin(fileSystem, fileSystem.getRoot(), audit, treeManager);
-        adminWindow.setLocationRelativeTo(this);
+        adminWindow.setLocationRelativeTo(null);
         adminWindow.setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed

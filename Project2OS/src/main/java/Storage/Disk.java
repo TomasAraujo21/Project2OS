@@ -123,8 +123,5 @@ public class Disk {
     public void setFreeBlocks(int freeBlocks) {
         this.freeBlocks = freeBlocks;
     }
-    
-    
-    
-   
+
 }
