@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Interfaces;
-// TreeManager.java
+
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -24,14 +24,19 @@ public class TreeManager {
     private DefaultTreeModel model;          
     private Directory selectedDirectory = null;
 
+    // NUEVO: para selección de archivos
+    private MyFile selectedFile = null;                    
+    private Directory selectedFileDirectory = null;        
+
     public TreeManager(FileSystem fileSystem) {
         this.fileSystem = fileSystem;
-        this.tree = new JTree();   // CAMBIO
+        this.tree = new JTree();
     }
 
     public void buildTree() {
         Directory rootDir = fileSystem.getRoot();
 
+        // CAMBIO: seguimos usando el Directory como userObject
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(rootDir);
 
         buildSubtree(rootNode, rootDir);
@@ -40,7 +45,7 @@ public class TreeManager {
             model = new DefaultTreeModel(rootNode);
             tree.setModel(model);
 
-            addSelectionListener();
+            addSelectionListener();   // aquí se maneja qué está seleccionado
 
         } else {
             model.setRoot(rootNode);
@@ -61,10 +66,31 @@ public class TreeManager {
 
                 Object userObj = node.getUserObject();
 
+                // CAMBIO: ahora distinguimos entre directorio y archivo
                 if (userObj instanceof Directory) {
                     selectedDirectory = (Directory) userObj;
+                    selectedFile = null;
+                    selectedFileDirectory = null;
+
+                } else if (userObj instanceof MyFile) {
+                    selectedFile = (MyFile) userObj;
+
+                    // buscamos el padre para saber en qué directorio está este archivo
+                    DefaultMutableTreeNode parent =
+                            (DefaultMutableTreeNode) node.getParent();
+
+                    if (parent != null && parent.getUserObject() instanceof Directory) {
+                        selectedFileDirectory = (Directory) parent.getUserObject();
+                    } else {
+                        selectedFileDirectory = null;
+                    }
+
+                    // al seleccionar un archivo no nos interesa el selectedDirectory "normal"
+                    selectedDirectory = null;
                 } else {
                     selectedDirectory = null;
+                    selectedFile = null;
+                    selectedFileDirectory = null;
                 }
             }
         });
@@ -111,5 +137,101 @@ public class TreeManager {
 
     public Directory getSelectedDirectory() {
         return selectedDirectory;
+    }
+
+    public MyFile getSelectedFile() {
+        return selectedFile;
+    }
+
+    public Directory getSelectedFileDirectory() {
+        return selectedFileDirectory;
+    }
+
+    public void openDirectoryChooser(java.util.function.Consumer<Directory> onSelected) {
+        if (model == null) {
+            buildTree();
+        } else {
+            refresh();
+        }
+
+        JFrame frame = new JFrame("Seleccionar directorio");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(400, 500);
+
+        JScrollPane scrollPane = new JScrollPane(tree);
+        frame.add(scrollPane, java.awt.BorderLayout.CENTER);
+
+        JPanel bottom = new JPanel();
+        JButton btnSelect = new JButton("Seleccionar");
+        JButton btnCancel = new JButton("Cancelar");
+        bottom.add(btnSelect);
+        bottom.add(btnCancel);
+
+        frame.add(bottom, java.awt.BorderLayout.SOUTH);
+
+        btnSelect.addActionListener(ev -> {
+            Directory dir = selectedDirectory;
+
+            if (dir == null) {
+                dir = fileSystem.getRoot();
+            }
+
+            if (dir != null && onSelected != null) {
+                onSelected.accept(dir);
+            }
+            frame.dispose();
+        });
+
+        btnCancel.addActionListener(ev -> frame.dispose());
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    public void openFileChooser(java.util.function.BiConsumer<Directory, MyFile> onSelected) {
+        if (model == null) {
+            buildTree();
+        } else {
+            refresh();
+        }
+
+        JFrame frame = new JFrame("Seleccionar archivo");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(400, 500);
+
+        JScrollPane scrollPane = new JScrollPane(tree);
+        frame.add(scrollPane, java.awt.BorderLayout.CENTER);
+
+        JPanel bottom = new JPanel();
+        JButton btnSelect = new JButton("Seleccionar");
+        JButton btnCancel = new JButton("Cancelar");
+        bottom.add(btnSelect);
+        bottom.add(btnCancel);
+        frame.add(bottom, java.awt.BorderLayout.SOUTH);
+
+        btnSelect.addActionListener(ev -> {
+            MyFile f = selectedFile;
+            Directory dir = selectedFileDirectory;
+
+            if (f == null || dir == null) {
+                javax.swing.JOptionPane.showMessageDialog(
+                        frame,
+                        "Por favor, selecciona un archivo.",
+                        "Ningún archivo seleccionado",
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
+            if (onSelected != null) {
+                onSelected.accept(dir, f);
+            }
+            frame.dispose();
+        });
+
+        btnCancel.addActionListener(ev -> frame.dispose());
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 }
