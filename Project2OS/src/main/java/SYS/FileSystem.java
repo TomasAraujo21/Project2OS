@@ -103,11 +103,110 @@ public class FileSystem {
         return file;
     }
     
+    public boolean deleteFile(Directory dir, MyFile file, String user) {
+        if (dir == null || file == null) {
+            return false;
+        }
+
+        // 1) Liberar los bloques del disco (lista encadenada a partir de firstBlock)
+        int firstBlock = file.getFirstBlock();
+        if (firstBlock >= 0) {
+            disk.freeBlocks(firstBlock);
+        }
+
+        // 2) Eliminar el archivo del directorio (usa tu método de Directory)
+        boolean removed = dir.deleteFile(file, user);
+
+        if (removed) {
+            audit.registerOperation(user,
+                    "Se eliminó el archivo " + file.getName() +
+                    " del directorio " + dir.getRute());
+        }
+
+        return removed;
+    }
+    
     public Directory addDirectory(String name, Directory parent, String user) {
         Directory newDir = new Directory(name, audit, parent, disk);
         parent.addDirectory(newDir);
 
         audit.registerOperation(user, "Directorio creado: " + newDir.getRute());
         return newDir;
+    }
+    
+    public boolean deleteDirectory(Directory dir, String user) {
+        if (dir == null) {
+            return false;
+        }
+
+        // No permitir borrar la raíz
+        if (dir == root) {
+            System.out.println("[FileSystem] No se puede eliminar el directorio raíz.");
+            return false;
+        }
+
+        // 1) Eliminar todos los archivos del directorio (liberando bloques)
+        while (dir.getFirstFile() != null) {
+            MyFile f = dir.getFirstFile();
+            deleteFile(dir, f, user);  // ya libera bloques y registra en auditoría
+        }
+
+        // 2) Eliminar recursivamente todos los subdirectorios
+        while (dir.getSubdirectories().getHead() != null) {
+            Directory child = dir.getSubdirectories().getHead().getData();
+            deleteDirectory(child, user);
+        }
+
+        // 3) Quitar este directorio de su padre
+        Directory parent = dir.getFather();
+        if (parent != null) {
+            // Esto ya registra en auditoría y lo saca de la lista de subdirectorios
+            return parent.deleteDirectory(dir);
+        }
+
+        return false;
+    }
+    
+    public boolean renameFile(Directory dir, MyFile file, String newName, String user) {
+        if (dir == null || file == null) {
+            return false;
+        }
+        if (newName == null || newName.isBlank()) {
+            return false;
+        }
+
+        String oldName = file.getName();
+        file.setName(newName);
+
+        // Usamos el Audit central del FileSystem
+        if (audit != null) {
+            audit.registerOperation(
+                    user,
+                    "Se renombró el archivo " + oldName + " a " + newName
+                    + " en el directorio " + dir.getRute()
+            );
+        }
+
+        return true;
+    }
+    
+    public boolean renameDirectory(Directory dir, String newName, String user) {
+        if (dir == null || newName == null || newName.isBlank()) {
+            return false;
+        }
+
+        String oldName = dir.getName();
+        dir.setName(newName);
+
+        if (audit != null) {
+            audit.registerOperation(
+                    user,
+                    "Se renombró el directorio " + oldName
+                    + " a " + newName
+                    + " en la ruta " + dir.getRute()
+            );
+        }
+
+        return true;
     }
 }
