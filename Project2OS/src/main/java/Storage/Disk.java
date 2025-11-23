@@ -13,6 +13,7 @@ public class Disk {
     private Block[] blocks;
     private boolean[] busy;
     private int freeBlocks;
+    private int headPosition =0;
     
     //Funcion para inicializar el disco mediante un arreglo de bloques y el estado de cada uno.
     public Disk(int totalBlocks){
@@ -124,4 +125,15 @@ public class Disk {
         this.freeBlocks = freeBlocks;
     }
 
+    public int getHeadPosition() {
+        return headPosition;
+    }
+
+    public void setHeadPosition(int headPosition) {
+        if (headPosition >= 0 && headPosition < blocks.length) {
+        this.headPosition = headPosition;
+        }
+    }
+    
+    
 }
