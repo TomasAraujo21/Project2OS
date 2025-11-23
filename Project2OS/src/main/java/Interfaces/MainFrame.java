@@ -108,7 +108,7 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        User user = new User();
+        User user = new User(treeManager);
         this.setVisible(false);
         user.setLocationRelativeTo(null);
         user.setVisible(true);
