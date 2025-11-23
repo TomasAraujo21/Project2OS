@@ -27,7 +27,9 @@ public class User extends javax.swing.JFrame {
     /**
      * Creates new form User
      */
-    public User() {
+    public User(TreeManager treeManager) {
+        this.treeManager = treeManager;
+        
         initComponents();
     }
 

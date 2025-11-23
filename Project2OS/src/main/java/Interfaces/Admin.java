@@ -36,11 +36,13 @@ public class Admin extends javax.swing.JFrame {
         this.currentDirectory = startDir;
         this.audit = audit;
         this.treeManager = treeManager;
+        
         initComponents();
+        
+        this.treeManager.buildTree();
     }
-    //this.treeManager.buildTree();
     
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
