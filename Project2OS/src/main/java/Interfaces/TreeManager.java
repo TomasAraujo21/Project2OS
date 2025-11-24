@@ -23,14 +23,14 @@ public class TreeManager {
     private JTree tree;                      
     private DefaultTreeModel model;          
     private Directory selectedDirectory = null;
-
-    // NUEVO: para selección de archivos
     private MyFile selectedFile = null;                    
-    private Directory selectedFileDirectory = null;        
+    private Directory selectedFileDirectory = null;
+    private boolean showPrivFiles;
 
-    public TreeManager(FileSystem fileSystem) {
+    public TreeManager(FileSystem fileSystem, boolean showPrivFiles) {
         this.fileSystem = fileSystem;
         this.tree = new JTree();
+        this.showPrivFiles = showPrivFiles;
     }
 
     public void buildTree() {
@@ -110,6 +110,10 @@ public class TreeManager {
         Node<MyFile> curFileNode = dir.getFiles().getHead();
         while (curFileNode != null) {
             MyFile f = curFileNode.getData();
+            if (!showPrivFiles && !f.isIsPublic()) {
+                curFileNode = curFileNode.getNext();
+                continue;
+            }
             DefaultMutableTreeNode fNode = new DefaultMutableTreeNode(f);
             parentNode.add(fNode);
             curFileNode = curFileNode.getNext();

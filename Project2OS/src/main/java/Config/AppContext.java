@@ -16,7 +16,6 @@ public class AppContext {
     public static final LinkedList<String> LOG_LIST = new LinkedList<>();
     public static final Audit AUDIT = new Audit(LOG_LIST);
     public static final FileSystem FILE_SYSTEM = new FileSystem(100, AUDIT);
-    public static final TreeManager TREE_MANAGER = new TreeManager(FILE_SYSTEM);
 
     private AppContext() {
         
