@@ -36,10 +36,11 @@ public class FileSystem {
     }
 
     public MyFile createFile(Directory targetDir,
-                             String name,
-                             int sizeBlocks,
-                             String color,
-                             String user) {
+                            String name,
+                            int sizeBlocks,
+                            String color,
+                            String user,
+                            boolean isPublic) {
 
         if (!disk.getStorage(sizeBlocks)) {
             System.out.println("No hay espacio suficiente en el disco");
@@ -64,14 +65,14 @@ public class FileSystem {
             return null;
         }
 
-        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color);
+        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color, isPublic);
 
         targetDir.addFile(file, user);
 
         return file;
     }
     
-    public MyFile addFile(String name, int sizeBlocks, String color, Directory targetDir, String user) {
+    public MyFile addFile(String name, int sizeBlocks, String color, Directory targetDir, String user, boolean isPublic) {
         // Verificar espacio en el disco
         if (!disk.getStorage(sizeBlocks)) {
             System.out.println("No hay espacio suficiente en el disco");
@@ -91,8 +92,8 @@ public class FileSystem {
             return null;
         }
 
-        // Crear el archivo lógico
-        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color);
+        // Crear el archivo
+        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color, isPublic);
 
         // Agregar el archivo al directorio y registrar en auditoría
         if (targetDir == null) {
@@ -108,13 +109,11 @@ public class FileSystem {
             return false;
         }
 
-        // 1) Liberar los bloques del disco (lista encadenada a partir de firstBlock)
         int firstBlock = file.getFirstBlock();
         if (firstBlock >= 0) {
             disk.freeBlocks(firstBlock);
         }
 
-        // 2) Eliminar el archivo del directorio (usa tu método de Directory)
         boolean removed = dir.deleteFile(file, user);
 
         if (removed) {
@@ -145,22 +144,18 @@ public class FileSystem {
             return false;
         }
 
-        // 1) Eliminar todos los archivos del directorio (liberando bloques)
         while (dir.getFirstFile() != null) {
             MyFile f = dir.getFirstFile();
-            deleteFile(dir, f, user);  // ya libera bloques y registra en auditoría
+            deleteFile(dir, f, user);
         }
 
-        // 2) Eliminar recursivamente todos los subdirectorios
         while (dir.getSubdirectories().getHead() != null) {
             Directory child = dir.getSubdirectories().getHead().getData();
             deleteDirectory(child, user);
         }
 
-        // 3) Quitar este directorio de su padre
         Directory parent = dir.getFather();
         if (parent != null) {
-            // Esto ya registra en auditoría y lo saca de la lista de subdirectorios
             return parent.deleteDirectory(dir);
         }
 
@@ -178,7 +173,6 @@ public class FileSystem {
         String oldName = file.getName();
         file.setName(newName);
 
-        // Usamos el Audit central del FileSystem
         if (audit != null) {
             audit.registerOperation(
                     user,

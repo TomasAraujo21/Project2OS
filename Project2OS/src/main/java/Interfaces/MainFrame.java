@@ -17,11 +17,7 @@ import java.util.concurrent.Semaphore;
 public class MainFrame extends javax.swing.JFrame {
     private final FileSystem fileSystem;
     private final Audit audit;
-    private final TreeManager treeManager;
-    
-    
-
-
+    private TreeManager treeManager;
 
     /**
      * Creates new form MainFrame
@@ -29,7 +25,6 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         this.fileSystem = AppContext.FILE_SYSTEM;
         this.audit = AppContext.AUDIT;
-        this.treeManager = AppContext.TREE_MANAGER;
 
         initComponents();
         setLocationRelativeTo(null);
@@ -112,19 +107,21 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        treeManager = new TreeManager(AppContext.FILE_SYSTEM, false);
         User user = new User(treeManager);
+        
         this.setVisible(false);
         user.setLocationRelativeTo(null);
         user.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-
-        Admin adminWindow = new Admin(fileSystem, fileSystem.getRoot(), audit, treeManager);
+        treeManager = new TreeManager(AppContext.FILE_SYSTEM, true);
+        Admin admin = new Admin(fileSystem, fileSystem.getRoot(), audit, treeManager);
         
         this.setVisible(false);
-        adminWindow.setLocationRelativeTo(null);
-        adminWindow.setVisible(true);
+        admin.setLocationRelativeTo(null);
+        admin.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**

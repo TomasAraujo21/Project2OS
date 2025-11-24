@@ -13,12 +13,14 @@ public class MyFile {
     private int size;
     private int firstBlock;
     private String color;
+    private boolean isPublic;
 
-    public MyFile(String name, int size, int firstBlock, String color) {
+    public MyFile(String name, int size, int firstBlock, String color, boolean isPublic) {
         this.name = name;
         this.size = size;
         this.firstBlock = firstBlock;
         this.color = color;
+        this.isPublic = isPublic;
     }
 
     public String getName() {
@@ -52,7 +54,15 @@ public class MyFile {
     public void setColor(String color) {
         this.color = color;
     }
-    
+
+    public boolean isIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+      
     @Override
     public String toString() {
         return name;
