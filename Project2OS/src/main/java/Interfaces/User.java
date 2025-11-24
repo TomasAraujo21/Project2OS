@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.* ;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.concurrent.Semaphore;
 
 /**
  *
@@ -23,6 +24,9 @@ public class User extends javax.swing.JFrame {
     private static ClockManager clockManager;
     //private final JPanel processList;
     private final AtomicInteger nextId = new AtomicInteger(1);
+    private final Semaphore readyLock   = new Semaphore(1, true);
+    private final Semaphore blockedLock = new Semaphore(1, true);
+    private final Semaphore exitLock = new Semaphore(1, true);
 
     /**
      * Creates new form User
@@ -61,7 +65,7 @@ public class User extends javax.swing.JFrame {
         cycles2 = new javax.swing.JSpinner();
         types = new javax.swing.JComboBox<>();
         jButton4 = new javax.swing.JButton();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        planningAlgorithm = new javax.swing.JComboBox<>();
         jLabel8 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         listP = new javax.swing.JPanel();
@@ -121,7 +125,12 @@ public class User extends javax.swing.JFrame {
             }
         });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FIFO", "SSTF", "SCAN", "C-SCAN" }));
+        planningAlgorithm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FIFO", "SSTF", "SCAN", "C-SCAN" }));
+        planningAlgorithm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                planningAlgorithmActionPerformed(evt);
+            }
+        });
 
         jLabel8.setText("Políticas generadas:");
 
@@ -161,7 +170,7 @@ public class User extends javax.swing.JFrame {
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGap(78, 78, 78)
                                 .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -195,7 +204,7 @@ public class User extends javax.swing.JFrame {
                     .addComponent(cycles2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
                 .addComponent(createProcess)
@@ -297,6 +306,7 @@ public class User extends javax.swing.JFrame {
         Integer exceptionCycle = ((Number) cycles1.getValue()).intValue();
         Integer cyclesToCompleteRequest = ((Number) cycles2.getValue()).intValue();
         String type = (String) types.getSelectedItem().toString();
+        String selected = (String) planningAlgorithm.getSelectedItem();
         
         if (name.isEmpty()) {
             // Validación para que el nombre no sea vacío.
@@ -384,6 +394,10 @@ public class User extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton4ActionPerformed
 
+    private void planningAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planningAlgorithmActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_planningAlgorithmActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -427,7 +441,6 @@ public class User extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton4;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -442,6 +455,7 @@ public class User extends javax.swing.JFrame {
     private javax.swing.JSpinner jSpinner2;
     private javax.swing.JPanel listP;
     private javax.swing.JTextField nameProcess;
+    private javax.swing.JComboBox<String> planningAlgorithm;
     private javax.swing.JComboBox<String> types;
     // End of variables declaration//GEN-END:variables
 }
