@@ -11,7 +11,7 @@ import Storage.Disk;
  * @author Gabriel Flores
  * 
  */
-public class SSTF {
+public class SSTF implements SchedulingAlgorithm {
     private Queue ready;
     private Disk disk;
 
@@ -88,5 +88,15 @@ public class SSTF {
             ready.enqueue(arr[k]);
     
         }    
+    }
+    
+    @Override
+    public void onTick(Disk disk) {
+        // do nothing
+    }
+    
+    @Override
+    public void dispatch(Disk disk) {
+        // do nothing
     }
 }

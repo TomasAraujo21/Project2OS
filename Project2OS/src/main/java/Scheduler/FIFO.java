@@ -5,11 +5,12 @@
 package Scheduler;
 import Process.Process;
 import DS.Queue;
+import Storage.Disk;
 /**
  *
  * @author Gabriel Flores
  */
-public class FIFO  {
+public class FIFO implements SchedulingAlgorithm {
     private Queue ready;
 
     public FIFO(Queue ready) {
@@ -60,5 +61,15 @@ public class FIFO  {
             ready.enqueue(arr[k]);
         }
     
+    }
+    
+    @Override
+    public void onTick(Disk disk) {
+        // do nothing
+    }
+    
+    @Override
+    public void dispatch(Disk disk) {
+        // do nothing
     }
 }
