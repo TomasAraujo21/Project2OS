@@ -106,16 +106,19 @@ public class Queue<T> {
         return array;
     }
 
-    public Process[] getAllElements() {
-        Process[] elements = new Process[size]; 
-        Node<T> current = front;               
-        int index = 0;
-        while (current != null) {
-            elements[index++] = (Process) current.data; 
-            current = current.next;
-        }
-        return elements;
+    public T[] getAllElements() {
+    T[] elements = (T[]) new Object[size]; 
+    Node<T> current = front;
+    int index = 0;
+
+    while (current != null) {
+        elements[index++] = current.data;
+        current = current.next;
     }
+
+    return elements;
+}
+
 
     // Clear the queue
     public void clear() {
