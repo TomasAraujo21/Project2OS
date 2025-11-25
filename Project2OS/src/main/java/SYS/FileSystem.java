@@ -4,8 +4,16 @@
  */
 package SYS;
 import Audit.Audit;
+import DS.LinkedList;
+import Storage.Block;
 import Storage.Disk;
 import javax.swing.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 
 /**
@@ -35,6 +43,19 @@ public class FileSystem {
         return audit;
     }
 
+    public void setRoot(Directory root) {
+        this.root = root;
+    }
+
+    public void setDisk(Disk disk) {
+        this.disk = disk;
+    }
+
+    public void setAudit(Audit audit) {
+        this.audit = audit;
+    }
+    
+    
     public MyFile createFile(Directory targetDir,
                             String name,
                             int sizeBlocks,
@@ -203,4 +224,200 @@ public class FileSystem {
 
         return true;
     }
+    
+    public static FileSystem loadState(String path) {
+
+    try (FileReader reader = new FileReader(path)) {
+
+        Gson gson = new Gson();
+
+        JsonObject rootJson = JsonParser.parseReader(reader).getAsJsonObject();
+
+        // ============
+        // 1. CARGAR DISCO
+        // ============
+        JsonObject diskJson = rootJson.getAsJsonObject("disk");
+        int totalBlocks = diskJson.get("totalBlocks").getAsInt();
+
+        Disk disk = new Disk(totalBlocks);
+
+        boolean[] busy = gson.fromJson(diskJson.get("busy"), boolean[].class);
+        disk.setBusy(busy);
+
+        JsonObject nextMap = diskJson.getAsJsonObject("next");
+        for (String key : nextMap.keySet()) {
+            int id = Integer.parseInt(key);
+            int next = nextMap.get(key).getAsInt();
+
+            if (next != -1) {
+                disk.getBlocks()[id].setNext(disk.getBlocks()[next]);
+            }
+        }
+
+        // ============
+        // 2. CARGAR AUDITORIA
+        // ============
+        JsonObject auditJson = rootJson.getAsJsonObject("audit");
+        LinkedList<String> logs = new LinkedList<>();
+        auditJson.getAsJsonArray("logs").forEach(log -> logs.add(log.getAsString()));
+
+        Audit audit = new Audit(logs);
+
+        // ============
+        // 3. CARGAR DIRECTORIOS Y ARCHIVOS
+        // ============
+        Directory rootDir = loadDirectory(rootJson.getAsJsonObject("rootDirectory"), audit, disk, null);
+
+        // ============
+        // 4. RECONSTRUIR FILESYSTEM COMPLETO
+        // ============
+        FileSystem fs = new FileSystem(totalBlocks, audit);
+        fs.setDisk(disk);
+        fs.setRoot(rootDir);
+
+        return fs;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+    private static Directory loadDirectory(JsonObject dirJson, Audit audit, Disk disk, Directory father) {
+
+    Directory dir = new Directory(
+            dirJson.get("name").getAsString(),
+            audit,
+            father,
+            disk
+    );
+
+    // Archivos
+    dirJson.getAsJsonArray("files").forEach(f -> {
+        JsonObject fo = f.getAsJsonObject();
+
+        MyFile file = new MyFile(
+                fo.get("name").getAsString(),
+                fo.get("size").getAsInt(),
+                fo.get("firstBlock").getAsInt(),
+                fo.get("color").getAsString(),
+                fo.get("isPublic").getAsBoolean()
+        );
+
+        dir.addFile(file, "Sistema");
+    });
+
+    // Subdirectorios
+    dirJson.getAsJsonArray("subdirectories").forEach(s -> {
+        Directory sub = loadDirectory(s.getAsJsonObject(), audit, disk, dir);
+        dir.getSubdirectories().add(sub);
+    });
+
+    return dir;
+}
+    private JsonObject serializeDirectoryGson(Directory dir) {
+
+    JsonObject obj = new JsonObject();
+    obj.addProperty("name", dir.getName());
+
+    // ======== FILES ========
+    JsonArray filesArray = new JsonArray();
+    var fileNode = dir.getFiles().getHead();
+
+    while (fileNode != null) {
+        MyFile f = fileNode.getData();
+        JsonObject fJson = new JsonObject();
+
+        fJson.addProperty("name", f.getName());
+        fJson.addProperty("size", f.getSize());
+        fJson.addProperty("firstBlock", f.getFirstBlock());
+        fJson.addProperty("color", f.getColor());
+        fJson.addProperty("isPublic", f.isIsPublic());
+
+        filesArray.add(fJson);
+        fileNode = fileNode.getNext();
+    }
+
+    obj.add("files", filesArray);
+
+    // ======== SUBDIRECTORIES ========
+    JsonArray dirArray = new JsonArray();
+    var dirNode = dir.getSubdirectories().getHead();
+
+    while (dirNode != null) {
+        Directory sub = dirNode.getData();
+        dirArray.add(serializeDirectoryGson(sub));
+        dirNode = dirNode.getNext();
+    }
+
+    obj.add("subdirectories", dirArray);
+
+    return obj;
+}
+
+    
+    
+    public void saveState(String path) {
+    try {
+
+        Gson gson = new Gson();
+
+        JsonObject fsJson = new JsonObject();
+
+        // ======================
+        // 1. DISCO
+        // ======================
+        JsonObject diskJson = new JsonObject();
+        diskJson.addProperty("totalBlocks", disk.getTotalBlocks());
+
+        // busy[]
+        diskJson.add("busy", gson.toJsonTree(disk.getBusy()));
+
+        // next pointers
+        JsonArray nextArray = new JsonArray();
+        for (Block b : disk.getBlocks()) {
+            if (b.getNext() != null)
+                nextArray.add(b.getNext().getId());
+            else
+                nextArray.add(-1);
+        }
+        diskJson.add("next", nextArray);
+
+        fsJson.add("disk", diskJson);
+
+        // ======================
+        // 2. AUDITORÍA
+        // ======================
+        JsonArray logsArray = new JsonArray();
+        var logNode = audit.getrLogs().getHead();
+        while (logNode != null) {
+            logsArray.add(logNode.getData());
+            logNode = logNode.getNext();
+        }
+        fsJson.add("audit", new JsonObject());
+        fsJson.getAsJsonObject("audit").add("logs", logsArray);
+
+        // ======================
+        // 3. DIRECTORIOS Y ARCHIVOS
+        // ======================
+        JsonObject rootJson = serializeDirectoryGson(this.root);
+        fsJson.add("rootDirectory", rootJson);
+
+        // ======================
+        // 4. GUARDAR ARCHIVO
+        // ======================
+        FileWriter fw = new FileWriter(path);
+        fw.write(gson.toJson(fsJson));
+        fw.close();
+
+        System.out.println("[SAVE] Sistema guardado correctamente.");
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.err.println("[SAVE] Error guardando estado.");
+    }
+}
+
+
+
+
 }
