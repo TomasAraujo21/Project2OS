@@ -21,11 +21,17 @@ public class CSCAN implements DiskSchedulingAlgorithm {
     @Override
     public void reorder(Queue<DiskRequest> queue, int headPos) {
 
-        if (queue == null || queue.isEmpty() || queue.getSize() <= 1) return;
+        if (queue == null || queue.isEmpty() || queue.getSize() <= 1) {
+            return;
+        }
 
-        DiskRequest[] arr = queue.getAllElements();
+        Object[] objs = queue.getAllElements();
 
-        // Insercion ordenada adaptado para C-SCAN
+        DiskRequest[] arr = new DiskRequest[objs.length];
+        for (int i = 0; i < objs.length; i++) {
+            arr[i] = (DiskRequest) objs[i];
+        }
+
         for (int i = 1; i < arr.length; i++) {
             DiskRequest key = arr[i];
             int j = i - 1;
@@ -34,13 +40,14 @@ public class CSCAN implements DiskSchedulingAlgorithm {
                 arr[j + 1] = arr[j];
                 j--;
             }
-
             arr[j + 1] = key;
         }
 
         // reconstruir la cola
         queue.clear();
-        for (DiskRequest req : arr) queue.enqueue(req);
+        for (DiskRequest req : arr) {
+            queue.enqueue(req);
+        }
     }
 
     private boolean shouldComeBefore(DiskRequest a, DiskRequest b, int headPos) {

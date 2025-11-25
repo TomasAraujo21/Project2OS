@@ -15,7 +15,7 @@ import SYS.*;
 public class DiskScheduler {
 
     private final Queue<DiskRequest> requestQueue; // cola de solicitudes
-    private final DiskSchedulingAlgorithm algorithm;
+    private DiskSchedulingAlgorithm algorithm;
     private final FileSystem fileSystem;
     private int headPosition = 0;
 
@@ -24,7 +24,15 @@ public class DiskScheduler {
         this.algorithm = algorithm;
         this.requestQueue = new Queue<>();
     }
-
+    
+    public void setAlgorithm(DiskSchedulingAlgorithm algorithm) {
+        this.algorithm = algorithm;
+    }
+    
+    public DiskSchedulingAlgorithm getAlgorithm() {
+        return algorithm;
+    }
+    
     // Agregar solicitud de disco
     public void submit(DiskRequest req) {
         requestQueue.enqueue(req);
@@ -34,7 +42,6 @@ public class DiskScheduler {
     // Reordenar la cola según la política
     public void reorder() {
         if (algorithm == null) return;
-
         algorithm.reorder(requestQueue, headPosition);
     }
 
@@ -49,6 +56,10 @@ public class DiskScheduler {
 
         DiskRequest req = requestQueue.dequeue();
         headPosition = req.getTargetBlock();
+        
+        if (algorithm instanceof SCAN) {
+            ((SCAN) algorithm).updateDirection(headPosition);
+        }
 
         System.out.println("[DISK] Ejecutando: " + req);
 

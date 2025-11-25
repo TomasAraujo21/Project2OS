@@ -6,7 +6,7 @@ package Interfaces;
 
 import Process.Process;
 import SYS.*;
-import Scheduler.DiskScheduler;
+import Scheduler.*;
 import DS.*;
 import Storage.DiskRequest;
 import Config.AppContext;
@@ -294,8 +294,6 @@ public class User extends javax.swing.JFrame {
             return;
         }
 
-        // Por ahora ignoramos la política o la aplicamos fijo si siempre usas FIFO
-        // (si luego quieres cambiar de FIFO a SSTF dinámicamente, tocamos DiskScheduler)
         if (opStr.equalsIgnoreCase("Crear")) {
             crearProcesoCreate();
         } else if (opStr.equalsIgnoreCase("Leer")) {
@@ -309,6 +307,28 @@ public class User extends javax.swing.JFrame {
 
     private void planningAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planningAlgorithmActionPerformed
         // TODO add your handling code here:
+        String selected = (String) planningAlgorithm.getSelectedItem();
+
+        switch (selected) {
+            case "FIFO" ->
+                AppContext.DISK_SCHEDULER.setAlgorithm(new FIFO());
+            case "SSTF" ->
+                AppContext.DISK_SCHEDULER.setAlgorithm(new SSTF());
+            case "SCAN" -> {
+                int max = AppContext.FILE_SYSTEM.getDisk().getTotalBlocks() - 1;
+                AppContext.DISK_SCHEDULER.setAlgorithm(new SCAN(max));
+            }
+            case "C-SCAN" -> {
+                int max = AppContext.FILE_SYSTEM.getDisk().getTotalBlocks() - 1;
+                AppContext.DISK_SCHEDULER.setAlgorithm(new CSCAN(max));
+            }
+        }
+        
+        AppContext.DISK_SCHEDULER.reorder();
+
+        refreshQueuePanel();
+
+        System.out.println("→ Política cambiada a " + selected);
     }//GEN-LAST:event_planningAlgorithmActionPerformed
 
     private void archLocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_archLocActionPerformed

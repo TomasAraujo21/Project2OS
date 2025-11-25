@@ -5,12 +5,8 @@
 package Interfaces;
 
 import javax.swing.*;
-import javax.swing.tree.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
 import SYS.*;
 import Audit.Audit;
-import DS.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -21,7 +17,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Stack;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -713,20 +708,20 @@ public class Admin extends javax.swing.JFrame {
 
     // Guardar en el JSON que contiene este directorio
     Gson gson = new Gson();
-    JsonObject dirJson = serializeDirectoryGson(dir);
-    String jsonPath = dir.getJsonPath(); // asegurarse de que Directory tiene un atributo con la ruta del JSON
-    if (jsonPath == null || jsonPath.isEmpty()) {
-    JOptionPane.showMessageDialog(this, "No se encontró el archivo JSON del directorio.", "Error", JOptionPane.ERROR_MESSAGE);
-    return;
-}
+//    JsonObject dirJson = serializeDirectoryGson(dir);
+//    String jsonPath = dir.getJsonPath(); // asegurarse de que Directory tiene un atributo con la ruta del JSON
+//    if (jsonPath == null || jsonPath.isEmpty()) {
+//    JOptionPane.showMessageDialog(this, "No se encontró el archivo JSON del directorio.", "Error", JOptionPane.ERROR_MESSAGE);
+//    return;
+//}
 
-try (FileWriter fw = new FileWriter(jsonPath, false)) {
-    fw.write(gson.toJson(dirJson));
-} catch (Exception e) {
-    e.printStackTrace();
-    JOptionPane.showMessageDialog(this, "Error guardando el directorio.", "Error", JOptionPane.ERROR_MESSAGE);
-    return;
-}
+//try (FileWriter fw = new FileWriter(jsonPath, false)) {
+//    fw.write(gson.toJson(dirJson));
+//} catch (Exception e) {
+//    e.printStackTrace();
+//    JOptionPane.showMessageDialog(this, "Error guardando el directorio.", "Error", JOptionPane.ERROR_MESSAGE);
+//    return;
+//}
 
     JOptionPane.showMessageDialog(this, "Directorio renombrado correctamente a:\n" + newName, "Éxito", JOptionPane.INFORMATION_MESSAGE);
 

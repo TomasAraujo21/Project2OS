@@ -19,14 +19,16 @@ public class SSTF implements DiskSchedulingAlgorithm {
     @Override
     public void reorder(Queue<DiskRequest> queue, int headPos) {
 
-        if (queue == null || queue.isEmpty() || queue.getSize() <= 1)
-            return;
+        if (queue == null || queue.isEmpty() || queue.getSize() <= 1) return;
 
-        DiskRequest[] arr = queue.getAllElements();
+        Object[] objs = queue.getAllElements();
 
-        // Insertion Sort basado en la distancia mínima al cabezal
+        DiskRequest[] arr = new DiskRequest[objs.length];
+        for (int i = 0; i < objs.length; i++) {
+            arr[i] = (DiskRequest) objs[i];
+        }
+
         for (int i = 1; i < arr.length; i++) {
-
             DiskRequest key = arr[i];
             int j = i - 1;
 
