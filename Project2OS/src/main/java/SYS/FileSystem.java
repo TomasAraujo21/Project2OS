@@ -25,6 +25,16 @@ public class FileSystem {
     private Directory root;
     private Disk disk;
     private Audit audit;
+    private String lastLoadedJsonPath;
+    
+    
+    public void setLastLoadedJsonPath(String path) {
+        this.lastLoadedJsonPath = path;
+    }
+
+    public String getLastLoadedJsonPath() {
+        return this.lastLoadedJsonPath;
+    }
 
     public FileSystem(int sizeDisk, Audit audit) {
         this.disk = new Disk(sizeDisk);
@@ -296,8 +306,8 @@ public class FileSystem {
         FileSystem fs = new FileSystem(totalBlocks, audit);
         fs.setDisk(disk);
         fs.setRoot(rootDir);
-
-        System.out.println("FileSystem cargado correctamente.");
+        fs.setLastLoadedJsonPath(path);
+        
         return fs;
 
     } catch (Exception e) {
@@ -431,7 +441,7 @@ public class FileSystem {
         // ======================
         // 4. GUARDAR ARCHIVO
         // ======================
-        FileWriter fw = new FileWriter(path);
+        FileWriter fw = new FileWriter(this.lastLoadedJsonPath,false);
         fw.write(gson.toJson(fsJson));
         fw.close();
 
