@@ -5,6 +5,7 @@
 package Process;
 
 import java.util.concurrent.Semaphore;
+import SYS.MyFile;
 
 /**
  *
@@ -13,6 +14,12 @@ import java.util.concurrent.Semaphore;
 public class Process extends Thread {
     
     
+    public enum OperationType {
+        Create,
+        Read,
+        Update,
+        Delete
+    }
     
     public enum Status {
         Running,
@@ -23,42 +30,32 @@ public class Process extends Thread {
     
     private Integer ID;
     private String processName;
-    private Integer instructionCount;
-    private Integer remainingBurstTime;
-    private boolean CPUbound;
-    private boolean IObound;
-    private Integer cyclesToExcept;
-    private Integer cyclesToCompleteRequest;
+    private OperationType operation;
+    private int diskPosition = 0;
+    private MyFile targetFile;
+//    private Integer cyclesToExcept;
+//    private Integer cyclesToCompleteRequest;
     private Status status;
-    private Integer PC;
-    private Integer MAR;
-    private Integer prior;
-    private Semaphore mutex;
-    private int arrivaltime;
-    private double responseRatio;
 
-    public Process(Integer ID, String processName, Integer instructionCount, Integer remainingBurstTime, boolean CPUbound, boolean IObound, Integer cyclesToExcept, Integer cyclesToCompleteRequest, Status status, Integer PC, Integer MAR, Integer prior, Semaphore mutex, int arrivaltime, double responseRatio) {
+
+//    public Process(Integer ID, String processName, Integer instructionCount, OperationType operation, String path, Integer cyclesToExcept, Integer cyclesToCompleteRequest, Status status) {
+//        this.ID = ID;
+//        this.processName = processName;
+//        this.instructionCount = instructionCount;
+//        this.operation = operation;
+//        this.path = path;
+//        this.cyclesToExcept = cyclesToExcept;
+//        this.cyclesToCompleteRequest = cyclesToCompleteRequest;
+//        this.status = status.Ready;
+//    }
+    
+    public Process(Integer ID, String processName, OperationType operation, int diskPosition, MyFile targetFile, Status status) {
         this.ID = ID;
         this.processName = processName;
-        this.instructionCount = instructionCount;
-        this.remainingBurstTime = remainingBurstTime;
-        this.CPUbound = CPUbound;
-        this.IObound = IObound;
-        this.cyclesToExcept = cyclesToExcept;
-        this.cyclesToCompleteRequest = cyclesToCompleteRequest;
+        this.operation = operation;
+        this.diskPosition = diskPosition;
+        this.targetFile = targetFile;
         this.status = status.Ready;
-        this.PC = 0;
-        this.MAR = 0;
-        this.prior = prior;
-        this.mutex = mutex;
-        this.arrivaltime = arrivaltime;
-        this.responseRatio = 0.0;
-    }
-
-    public Process(String processName, Integer instructionCount, Integer cyclesToExcept) {
-        this.processName = processName;
-        this.instructionCount = instructionCount;
-        this.cyclesToExcept = cyclesToExcept;
     }
 
     public Integer getID() {
@@ -77,53 +74,21 @@ public class Process extends Thread {
         this.processName = processName;
     }
 
-    public Integer getInstructionCount() {
-        return instructionCount;
-    }
-
-    public void setInstructionCount(Integer instructionCount) {
-        this.instructionCount = instructionCount;
-    }
-
-    public Integer getRemainingBurstTime() {
-        return remainingBurstTime;
-    }
-
-    public void setRemainingBurstTime(Integer remainingBurstTime) {
-        this.remainingBurstTime = remainingBurstTime;
-    }
-
-    public boolean isCPUbound() {
-        return CPUbound;
-    }
-
-    public void setCPUbound(boolean CPUbound) {
-        this.CPUbound = CPUbound;
-    }
-
-    public boolean isIObound() {
-        return IObound;
-    }
-
-    public void setIObound(boolean IObound) {
-        this.IObound = IObound;
-    }
-
-    public Integer getCyclesToExcept() {
-        return cyclesToExcept;
-    }
-
-    public void setCyclesToExcept(Integer cyclesToExcept) {
-        this.cyclesToExcept = cyclesToExcept;
-    }
-
-    public Integer getCyclesToCompleteRequest() {
-        return cyclesToCompleteRequest;
-    }
-
-    public void setCyclesToCompleteRequest(Integer cyclesToCompleteRequest) {
-        this.cyclesToCompleteRequest = cyclesToCompleteRequest;
-    }
+//    public Integer getCyclesToExcept() {
+//        return cyclesToExcept;
+//    }
+//
+//    public void setCyclesToExcept(Integer cyclesToExcept) {
+//        this.cyclesToExcept = cyclesToExcept;
+//    }
+//
+//    public Integer getCyclesToCompleteRequest() {
+//        return cyclesToCompleteRequest;
+//    }
+//
+//    public void setCyclesToCompleteRequest(Integer cyclesToCompleteRequest) {
+//        this.cyclesToCompleteRequest = cyclesToCompleteRequest;
+//    }
 
     public Status getStatus() {
         return status;
@@ -133,71 +98,35 @@ public class Process extends Thread {
         this.status = status;
     }
 
-    public Integer getPC() {
-        return PC;
+    public OperationType getOperation() {
+        return operation;
     }
 
-    public void setPC(Integer PC) {
-        this.PC = PC;
+    public void setOperation(OperationType operation) {
+        this.operation = operation;
     }
 
-    public Integer getMAR() {
-        return MAR;
+    public int getDiskPosition() {
+        return diskPosition;
     }
 
-    public void setMAR(Integer MAR) {
-        this.MAR = MAR;
+    public void setDiskPosition(int diskPosition) {
+        this.diskPosition = diskPosition;
     }
-
-    public Integer getPrior() {
-        return prior;
-    }
-
-    public void setPrior(Integer prior) {
-        this.prior = prior;
-    }
-
-    public Semaphore getMutex() {
-        return mutex;
-    }
-
-    public void setMutex(Semaphore mutex) {
-        this.mutex = mutex;
-    }
-
-    public int getArrivaltime() {
-        return arrivaltime;
-    }
-
-    public void setArrivaltime(int arrivaltime) {
-        this.arrivaltime = arrivaltime;
-    }
-
-    public double getResponseRatio() {
-        return responseRatio;
-    }
-
-    public void setResponseRatio(double responseRatio) {
-        this.responseRatio = responseRatio;
-    }
+    
     
     public void printProcessDetail(){
         System.out.println("Process ID:" + ID);
         System.out.println("Name:" + processName);
-        System.out.println("Instruction Count:" + instructionCount);
-        System.out.println("Remaining Burst time:" + remainingBurstTime);
-        System.out.println("CPU Bound:" + CPUbound);
-        System.out.println("I/O Bound:" + IObound);
-        System.out.println("# Cycles for exception:" + cyclesToExcept);
-        System.out.println("# Cycles to complete the request:" + cyclesToCompleteRequest);
+//        System.out.println("# Cycles for exception:" + cyclesToExcept);
+//        System.out.println("# Cycles to complete the request:" + cyclesToCompleteRequest);
         System.out.println("Status:" + status);
-        System.out.println("Program Counter (PC):" + PC);
-        System.out.println("Memory Address Register (MAR):" + MAR);
+
     }
 
     @Override
     public String toString() {
-        return "Process{" + "processName=" + processName + ", instructionCount=" + instructionCount + '}';
+        return "Process{" + "processName=" + processName + ", instructionCount=" + '}';
     }
     
     

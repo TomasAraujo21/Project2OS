@@ -3,13 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
 package Scheduler;
-import Storage.Disk;
+
+import DS.*;
+import Storage.DiskRequest;
 /**
  *
  * @author Gabriel Flores
  */
-public interface SchedulingAlgorithm {
-    void reorder();
-    void dispatch(Disk disk);
-    void onTick(Disk disk);
+public interface DiskSchedulingAlgorithm {
+    void reorder(Queue<DiskRequest> queue, int headPos);
 }
