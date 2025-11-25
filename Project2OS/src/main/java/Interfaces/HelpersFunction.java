@@ -14,33 +14,33 @@ import javax.swing.JOptionPane;
  * @author Gabriel Flores
  */
 public class HelpersFunction {
-    /**
-     * 
-     * @param planningAlgorithm
-     * @param readyQueue
-     * @param clockManager
-     * @return Aplica el algoritmo de planificación seleccionado
-     */
-    public Scheduler updateSchedulerAlgorithm(String planningAlgorithm, Queue readyQueue, ClockManager clockManager, Semaphore readyLock) {
-//        String selected = (String) planningAlgorithm.getSelectedItem();
-        String selected = planningAlgorithm; 
-
-        switch (selected) {
-            case "FIFO":
-                System.out.println("Algoritmo cambiado a FIFO");
-                JOptionPane.showMessageDialog(null, "✅ Configuración guardada exitosamente.");
-                return new Scheduler(new FIFO(readyQueue), readyQueue);
-                
-            case "SSTF":
-                System.out.println("Algoritmo cambiado a SSTF");
-                JOptionPane.showMessageDialog(null, "✅ Configuración guardada exitosamente.");
-                //return new Scheduler(new SSTF(readyQueue), readyQueue);
-
-            
-            default:
-                System.out.println("Algoritmo no reconocido.");
-                break;
-        }
-        return new Scheduler(new FIFO(readyQueue), readyQueue);
-    }
+//    /**
+//     * 
+//     * @param planningAlgorithm
+//     * @param readyQueue
+//     * @param clockManager
+//     * @return Aplica el algoritmo de planificación seleccionado
+//     */
+//    public DiskScheduler updateSchedulerAlgorithm(String planningAlgorithm, Queue readyQueue, ClockManager clockManager, Semaphore readyLock) {
+////        String selected = (String) planningAlgorithm.getSelectedItem();
+//        String selected = planningAlgorithm; 
+//
+//        switch (selected) {
+//            case "FIFO":
+//                System.out.println("Algoritmo cambiado a FIFO");
+//                JOptionPane.showMessageDialog(null, "✅ Configuración guardada exitosamente.");
+//                return new DiskScheduler(new FIFO(readyQueue), readyQueue);
+//                
+//            case "SSTF":
+//                System.out.println("Algoritmo cambiado a SSTF");
+//                JOptionPane.showMessageDialog(null, "✅ Configuración guardada exitosamente.");
+//                //return new Scheduler(new SSTF(readyQueue), readyQueue);
+//
+//            
+//            default:
+//                System.out.println("Algoritmo no reconocido.");
+//                break;
+//        }
+//        return new DiskScheduler(new FIFO(readyQueue), readyQueue);
+//    }
 }
