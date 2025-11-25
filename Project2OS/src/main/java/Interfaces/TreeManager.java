@@ -19,13 +19,17 @@ import SYS.*;
 
 public class TreeManager {
 
-    private final FileSystem fileSystem;     
+    private FileSystem fileSystem;     
     private JTree tree;                      
     private DefaultTreeModel model;          
     private Directory selectedDirectory = null;
     private MyFile selectedFile = null;                    
     private Directory selectedFileDirectory = null;
     private boolean showPrivFiles;
+
+    public void setFileSystem(FileSystem fileSystem) {
+        this.fileSystem = fileSystem;
+    }
 
     public TreeManager(FileSystem fileSystem, boolean showPrivFiles) {
         this.fileSystem = fileSystem;
