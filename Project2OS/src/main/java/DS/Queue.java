@@ -106,7 +106,7 @@ public class Queue<T> {
         return array;
     }
 
-    public T[] getAllElements() {
+    public Object[] getAllElements() {
     T[] elements = (T[]) new Object[size]; 
     Node<T> current = front;
     int index = 0;
