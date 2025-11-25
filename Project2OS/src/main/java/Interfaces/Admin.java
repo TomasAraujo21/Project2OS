@@ -11,6 +11,10 @@ import java.awt.*;
 import SYS.*;
 import Audit.Audit;
 import DS.*;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -859,17 +863,49 @@ public class Admin extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
-        FileSystem loaded = FileSystem.loadState("FilesState.json");
+    JFileChooser chooser = new JFileChooser("versions/");
+    chooser.setDialogTitle("Selecciona la versión del sistema");
+    chooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
 
-    if (loaded != null) {
-        this.fileSystem = loaded;  // <--- ACTUALIZA TU SISTEMA
+    int result = chooser.showOpenDialog(this);
+
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = chooser.getSelectedFile();
+
+        FileSystem loaded = FileSystem.loadState(selectedFile.getAbsolutePath());
+        if (loaded != null) {
+        this.fileSystem = loaded;
+        treeManager.setFileSystem(loaded);   // <-- ACTUALIZA TREE MANAGER
         JOptionPane.showMessageDialog(this, "Versión cargada correctamente.");
+    } else {
+        JOptionPane.showMessageDialog(this, "Error cargando versión.");
+    }
     }
     }//GEN-LAST:event_jButton11ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        fileSystem.saveState("FilesState.json");
-        JOptionPane.showMessageDialog(this, "Versión guardada correctamente.");
+  
+        try {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String filename = "FilesState_" + timestamp + ".json";
+        fileSystem.saveState("versions/" + filename);
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Versión del sistema guardada correctamente.",
+                "Éxito",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Error al guardar el estado: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+        e.printStackTrace();
+    }
     }//GEN-LAST:event_jButton5ActionPerformed
 
     /**
