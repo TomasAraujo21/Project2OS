@@ -125,8 +125,6 @@ public class User extends javax.swing.JFrame {
             }
         });
 
-        archName.setText("jTextField1");
-
         jLabel4.setText("Nombre Archivo:");
 
         jLabel3.setText("Tamaño:");
@@ -546,16 +544,41 @@ public class User extends javax.swing.JFrame {
         });
     }
     
+    private javax.swing.JPanel buildRequestCard(DiskRequest req) {
+        javax.swing.JPanel card = new javax.swing.JPanel();
+        card.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5),
+                javax.swing.BorderFactory.createLineBorder(java.awt.Color.GRAY, 1)
+        ));
+        card.setLayout(new java.awt.GridLayout(3, 1));
+
+        Process p = req.getProcess();
+
+        String name = (p != null) ? p.getProcessName() : "(sin nombre)";
+        String op = (req.getType() != null) ? req.getType().name() : "(desconocida)";
+        String state = (p != null && p.getStatus() != null) ? p.getStatus().name() : "(desconocido)";
+
+        javax.swing.JLabel lblName = new javax.swing.JLabel("Proceso: " + name);
+        javax.swing.JLabel lblOp = new javax.swing.JLabel("Operación: " + op);
+        javax.swing.JLabel lblState = new javax.swing.JLabel("Estado: " + state);
+
+        card.add(lblName);
+        card.add(lblOp);
+        card.add(lblState);
+
+        return card;
+    }
+    
     private void refreshQueuePanel() {
         listP.removeAll();
-        listP.setLayout(new java.awt.GridLayout(0, 1)); // una fila por solicitud
+        listP.setLayout(new javax.swing.BoxLayout(listP, javax.swing.BoxLayout.Y_AXIS));
 
         Queue.Node<DiskRequest>[] nodes = AppContext.DISK_SCHEDULER.getQueue().getAllNodes();
         if (nodes != null) {
             for (Queue.Node<DiskRequest> node : nodes) {
                 DiskRequest req = node.getData();
-                JLabel lbl = new JLabel(formatDiskRequest(req));
-                listP.add(lbl);
+                javax.swing.JPanel card = buildRequestCard(req);   // CAMBIO: usamos tarjetas
+                listP.add(card);
             }
         }
 
