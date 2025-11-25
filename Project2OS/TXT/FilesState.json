@@ -1,0 +1,62 @@
+{
+  "disk": {
+    "totalBlocks": 200,
+    "freeBlocks": 120,
+    "busy": [false, true, true, false, false, ...],
+    "blocks": [
+      {
+        "id": 0,
+        "next": 5
+      },
+      {
+        "id": 1,
+        "next": 2
+      },
+      {
+        "id": 2,
+        "next": -1
+      }
+    ],
+    "headPosition": 34
+  },
+
+  "auditLogs": [
+    "[2025-02-22 14:25:10] - Usuario: Admin - Acción: SE CREO EL ARCHIVO Tarea.docx en el directorio Documentos",
+    "[2025-02-22 14:28:30] - Usuario: Admin - Acción: Directorio creado: Imagenes"
+  ],
+
+  "rootDirectory": {
+    "name": "Root",
+    "files": [
+      {
+        "name": "inicio.txt",
+        "size": 1,
+        "firstBlock": 5,
+        "color": "Rojo",
+        "isPublic": true
+      }
+    ],
+    "subdirectories": [
+      {
+        "name": "Documentos",
+        "files": [
+          {
+            "name": "Tarea.docx",
+            "size": 4,
+            "firstBlock": 10,
+            "color": "Azul",
+            "isPublic": true
+          }
+        ],
+        "subdirectories": [
+          {
+            "name": "Universidad",
+            "files": [],
+            "subdirectories": []
+          }
+        ]
+      }
+    ]
+  }
+}
+

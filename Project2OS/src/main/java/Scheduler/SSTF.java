@@ -4,87 +4,47 @@
  */
 package Scheduler;
 import DS.Queue;
-import Process.Process;
-import Storage.Disk;
+import Storage.DiskRequest;
 /**
  *
  * @author Gabriel Flores
  * 
  */
-//public class SSTF implements DiskSchedulingAlgorithm {
-//    private Queue ready;
-//    private Disk disk;
-//
-//    public SSTF(Queue ready, Disk disk) {
-//        this.ready = ready;
-//        this.disk = disk;
-//    }
-//
-//    public Queue getReady() {
-//        return ready;
-//    }
-//
-//    public void setReady(Queue ready) {
-//        this.ready = ready;
-//    }
-//
-//    public Disk getDisk() {
-//        return disk;
-//    }
-//
-//    public void setDisk(Disk disk) {
-//        this.disk = disk;
-//    }
+public class SSTF implements DiskSchedulingAlgorithm {
 
-    
-    
-    /**
-     * Distancia absoluta entre cabezal y bloque solicitado.
-     */
-//    private int seekDistance(int head, Process p) {
-//        return Math.abs(p.getMAR() - head);
-//    }
-//    
-    /**
-     * Compara dos procesos por distancia al cabezal.
-     * Si empatan, elige el de menor ID.
-     */
-//    private int compare(Process a, Process b, int head) {
-//        int da = seekDistance(head, a);
-//        int db = seekDistance(head, b);
-//
-//        if (da != db) return da - db;
-//
-//        return a.getID().compareTo(b.getID());
-//    }
-    
-//    @Override
-//    public void reorder() {
-//        Process[] arr = ready.getAllElements();
-//        if (arr == null || arr.length <= 1) return;
-//
-//        // Necesitamos el cabezal actual para comparar
-//        int head = disk.getHeadPosition();
-//
-//        // insertion sort por SSTF
-//        for (int i = 1; i < arr.length; i++) {
-//            Process key = arr[i];
-//            int j = i - 1;
-//
-////            while (j >= 0 && compare(arr[j], key, head) > 0) {
-////                arr[j + 1] = arr[j];
-////                j--;
-////            }
-//
-//            arr[j + 1] = key;
-//        }
-//
-//        // reconstruir la cola
-//        ready.clear();
-//        for (int k = 0; k < arr.length; k++) {
-//            ready.enqueue(arr[k]);
-//    
-//        }    
-//    }
-    
-//}
+    public SSTF() {
+        // No requiere parámetros adicionales
+    }
+
+    @Override
+    public void reorder(Queue<DiskRequest> queue, int headPos) {
+
+        if (queue == null || queue.isEmpty() || queue.getSize() <= 1)
+            return;
+
+        DiskRequest[] arr = queue.getAllElements();
+
+        // Insertion Sort basado en la distancia mínima al cabezal
+        for (int i = 1; i < arr.length; i++) {
+
+            DiskRequest key = arr[i];
+            int j = i - 1;
+
+            while (j >= 0 && distance(key, headPos) < distance(arr[j], headPos)) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+
+            arr[j + 1] = key;
+        }
+
+        // reconstruir la cola
+        queue.clear();
+        for (DiskRequest req : arr) queue.enqueue(req);
+    }
+
+    private int distance(DiskRequest req, int headPos) {
+        return Math.abs(req.getTargetBlock() - headPos);
+    }
+}
+
