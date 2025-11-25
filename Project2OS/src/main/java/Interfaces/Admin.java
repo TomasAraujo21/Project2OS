@@ -11,6 +11,18 @@ import java.awt.*;
 import SYS.*;
 import Audit.Audit;
 import DS.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Stack;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -580,45 +592,71 @@ public class Admin extends javax.swing.JFrame {
     }//GEN-LAST:event_nameFileActionPerformed
 
     private void newNameFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newNameFileActionPerformed
-
+        
     }//GEN-LAST:event_newNameFileActionPerformed
 
     private void updArchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updArchActionPerformed
-        String newName = newNameFile.getText().toUpperCase().strip();
-        if (newName.isEmpty()) {
-            // Validación para que el nombre no sea vacío.
-            javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
+     
+    String newName = newNameFile.getText().toUpperCase().strip();
+
+    if (newName.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Ingresa un nombre válido.");
+        return;
+    }
+
+    treeManager.openFileChooser((Directory dir, MyFile file) -> {
+
+        // Validar selección
+        if (file == null || dir == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Primero selecciona un archivo.",
+                    "Ningún archivo seleccionado",
+                    JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
-        treeManager.openFileChooser((Directory dir, MyFile file) -> {
-            // Este código se ejecuta cuando el usuario hace clic en "Seleccionar" en el chooser
 
-            String user = System.getProperty("user.name");
+        String user = System.getProperty("user.name");
 
-            boolean ok = fileSystem.renameFile(dir, file, newName, user);
-
-            if (ok) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Archivo renombrado correctamente:\n"
-                        + "Nuevo nombre: " + newName
-                        + "\nDirectorio: " + dir.getRute(),
-                        "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-
-                // Limpiar campo y refrescar vista
-                newNameFile.setText("");
-                treeManager.refresh();
-            } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "No se pudo renombrar el archivo.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
+        // Verificar si ya existe un archivo con ese nombre en el directorio
+        Object filesObj = dir.getFiles();
+        if (filesObj instanceof MyFile[]) {
+            for (MyFile f : (MyFile[]) filesObj) {
+                if (f.getName().equalsIgnoreCase(newName)) {
+                    JOptionPane.showMessageDialog(this, "Ya existe un archivo con ese nombre.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             }
-        });
+        } else if (filesObj instanceof java.util.Collection<?>) {
+            for (Object o : (java.util.Collection<?>) filesObj) {
+                if (o instanceof MyFile f) {
+                    if (f.getName().equalsIgnoreCase(newName)) {
+                        JOptionPane.showMessageDialog(this, "Ya existe un archivo con ese nombre.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Renombrar en memoria
+        file.setName(newName);
+
+        // Guardar cambios en el MISMO JSON
+        fileSystem.saveState("");
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Archivo renombrado correctamente.\nNuevo nombre: " + newName,
+                "Éxito",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+        // Limpiar campo y refrescar
+        newNameFile.setText("");
+        treeManager.refresh();
+    });
+
     }//GEN-LAST:event_updArchActionPerformed
 
     private void updDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updDirActionPerformed
@@ -628,33 +666,72 @@ public class Admin extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
             return;
         }
-        treeManager.openDirectoryChooser(selectedDir -> {
+        treeManager.openDirectoryChooser(dir -> {
+        if (dir == null) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Primero selecciona un directorio.",
+                "Ningún directorio seleccionado",
+                JOptionPane.WARNING_MESSAGE
+        );
+        return;
+    }
 
-            String user = System.getProperty("user.name");
+    // Validar que no exista otro directorio con el mismo nombre en la misma carpeta padre
+    Directory parent = dir.getFather(); // suponiendo que tienes getFather()
+    if (parent != null) {
+        Object subsObj = parent.getSubdirectories();
+        boolean nameExists = false;
 
-            boolean ok = fileSystem.renameDirectory(selectedDir, newName, user);
-
-            if (ok) {
-                JOptionPane.showMessageDialog(this,
-                        "Directorio renombrado a:\n" + newName,
-                        "Éxito",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-
-                // limpiar campo
-                newDirectoryName.setText("");
-
-                // actualizar vista
-                treeManager.refresh();
-
-            } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "No se pudo renombrar el directorio.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
+        if (subsObj instanceof Directory[]) {
+            for (Directory d : (Directory[]) subsObj) {
+                if (d.getName().equalsIgnoreCase(newName)) {
+                    nameExists = true;
+                    break;
+                }
             }
+        } else if (subsObj instanceof java.util.Collection<?>) {
+            for (Object o : (java.util.Collection<?>) subsObj) {
+                if (o instanceof Directory d && d.getName().equalsIgnoreCase(newName)) {
+                    nameExists = true;
+                    break;
+                }
+            }
+        }
+
+        if (nameExists) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ya existe un directorio con ese nombre en esta carpeta.",
+                    "Nombre duplicado",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+    }
+    dir.setName(newName); // renombrar en memoria
+
+    // Guardar en el JSON que contiene este directorio
+    Gson gson = new Gson();
+    JsonObject dirJson = serializeDirectoryGson(dir);
+    String jsonPath = dir.getJsonPath(); // asegurarse de que Directory tiene un atributo con la ruta del JSON
+    if (jsonPath == null || jsonPath.isEmpty()) {
+    JOptionPane.showMessageDialog(this, "No se encontró el archivo JSON del directorio.", "Error", JOptionPane.ERROR_MESSAGE);
+    return;
+}
+
+try (FileWriter fw = new FileWriter(jsonPath, false)) {
+    fw.write(gson.toJson(dirJson));
+} catch (Exception e) {
+    e.printStackTrace();
+    JOptionPane.showMessageDialog(this, "Error guardando el directorio.", "Error", JOptionPane.ERROR_MESSAGE);
+    return;
+}
+
+    JOptionPane.showMessageDialog(this, "Directorio renombrado correctamente a:\n" + newName, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+    newDirectoryName.setText("");
+    treeManager.refresh();
         });
     }//GEN-LAST:event_updDirActionPerformed
 
@@ -737,42 +814,47 @@ public class Admin extends javax.swing.JFrame {
     }//GEN-LAST:event_selArchActionPerformed
 
     private void delArchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delArchActionPerformed
-        // TODO add your handling code here:
         if (fileToDelete == null || dirOfFileToDelete == null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Primero selecciona un archivo a eliminar.",
-                    "Ningún archivo seleccionado",
-                    JOptionPane.WARNING_MESSAGE
-            );
-            return;
-        }
+    JOptionPane.showMessageDialog(
+            this,
+            "Primero selecciona un archivo a eliminar.",
+            "Ningún archivo seleccionado",
+            JOptionPane.WARNING_MESSAGE
+    );
+    return;
+}
 
-        String user = System.getProperty("user.name");
-        boolean ok = fileSystem.deleteFile(dirOfFileToDelete, fileToDelete, user);
+String user = System.getProperty("user.name");
+boolean ok = fileSystem.deleteFile(dirOfFileToDelete, fileToDelete, user);
 
-        if (ok) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Archivo '" + fileToDelete.getName() + "' eliminado correctamente.",
-                    "Éxito",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+if (ok) {
+    String path = fileSystem.getLastLoadedJsonPath();
+    if (path != null) {
+        fileSystem.saveState(path);   // <-- Sobrescribe el JSON original
+    }
+    JOptionPane.showMessageDialog(
+            this,
+            "Archivo '" + fileToDelete.getName() + "' eliminado correctamente.",
+            "Éxito",
+            JOptionPane.INFORMATION_MESSAGE
+    );
 
-            // limpiar selección
-            fileToDelete = null;
-            dirOfFileToDelete = null;
+    // limpiar selección
+    fileToDelete = null;
+    dirOfFileToDelete = null;
 
-            // refrescar árbol visual
-            treeManager.refresh();
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No se pudo eliminar el archivo.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+    // refrescar árbol visual
+    treeManager.refresh();
+
+} else {
+    JOptionPane.showMessageDialog(
+            this,
+            "No se pudo eliminar el archivo.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+    );
+}
+
     }//GEN-LAST:event_delArchActionPerformed
 
     private void selDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selDirActionPerformed
@@ -790,60 +872,123 @@ public class Admin extends javax.swing.JFrame {
     }//GEN-LAST:event_selDirActionPerformed
 
     private void delDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delDirActionPerformed
-        // TODO add your handling code here:
-        if (dirToDelete == null) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Primero selecciona un directorio a eliminar.",
-                    "Ningún directorio seleccionado",
-                    JOptionPane.WARNING_MESSAGE
-            );
-            return;
+       if (dirToDelete == null) {
+    JOptionPane.showMessageDialog(
+            this,
+            "Primero selecciona un directorio a eliminar.",
+            "Ningún directorio seleccionado",
+            JOptionPane.WARNING_MESSAGE
+    );
+    return;
+}
+
+// Evitar borrar la raíz
+if (dirToDelete == fileSystem.getRoot()) {
+    JOptionPane.showMessageDialog(
+            this,
+            "No se puede eliminar el directorio raíz.",
+            "Operación no permitida",
+            JOptionPane.ERROR_MESSAGE
+    );
+    return;
+}
+
+int confirm = JOptionPane.showConfirmDialog(
+        this,
+        "¿Seguro que deseas eliminar el directorio:\n" + dirToDelete.getRute()
+        + "\n y todo su contenido?",
+        "Confirmar eliminación",
+        JOptionPane.YES_NO_OPTION
+);
+
+if (confirm != JOptionPane.YES_OPTION) return;
+
+String user = System.getProperty("user.name");
+boolean ok = fileSystem.deleteDirectory(dirToDelete, user);
+
+if (ok) {
+
+    // ===============================
+    //   ELIMINAR JSON DE /versions
+    // ===============================
+    String versionsPath = "C:/Users/58414/Documents/GitHub/Project2OS/Project2OS/versions";
+    File versionsFolder = new File(versionsPath);
+
+    if (versionsFolder.exists() && versionsFolder.isDirectory()) {
+
+        File[] files = versionsFolder.listFiles((dir, name) -> name.endsWith(".json"));
+
+        if (files != null) {
+            for (File f : files) {
+
+                try (FileReader reader = new FileReader(f)) {
+
+                    JsonObject rootJson = JsonParser.parseReader(reader).getAsJsonObject();
+                    JsonObject rootDirJson = rootJson.getAsJsonObject("rootDirectory");
+
+                    if (rootDirJson == null) continue;
+
+                    // -----------------------------------------
+                    // LAMBDA RECURSIVA PARA BUSCAR EL DIRECTORIO
+                    // -----------------------------------------
+                    final boolean[] found = { false };
+
+                    // Declaramos la lambda en un array para permitir recursión
+                    final java.util.function.Consumer<JsonObject>[] search = new java.util.function.Consumer[1];
+
+                    search[0] = (JsonObject obj) -> {
+                        if (found[0]) return;
+
+                        String name = obj.get("name").getAsString();
+                        if (name.equals(dirToDelete.getName())) {
+                            found[0] = true;
+                            return;
+                        }
+
+                        if (obj.has("subdirectories")) {
+                            JsonArray subs = obj.getAsJsonArray("subdirectories");
+                            for (JsonElement e : subs) {
+                                search[0].accept(e.getAsJsonObject());
+                                if (found[0]) return;
+                            }
+                        }
+                    };
+                    search[0].accept(rootDirJson);
+
+                    // Si lo contiene → eliminar archivo JSON
+                    if (found[0]) {
+                        reader.close(); // cerrar para evitar bloqueo en Windows
+                        f.delete();
+                    }
+
+                } catch (Exception e) {
+                    // JSON corrupto o inválido → ignorarlo
+                }
+            }
         }
+    }
 
-        // Evitar borrar la raíz
-        if (dirToDelete == fileSystem.getRoot()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No se puede eliminar el directorio raíz.",
-                    "Operación no permitida",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
+    JOptionPane.showMessageDialog(
+            this,
+            "Directorio eliminado correctamente.",
+            "Éxito",
+            JOptionPane.INFORMATION_MESSAGE
+    );
 
-        int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "¿Seguro que deseas eliminar el directorio:\n" + dirToDelete.getRute()
-                + "\n y todo su contenido?",
-                "Confirmar eliminación",
-                JOptionPane.YES_NO_OPTION
-        );
+    dirToDelete = null;
+    treeManager.refresh();
 
-        if (confirm != JOptionPane.YES_OPTION) {
-            return;
-        }
+} else {
 
-        String user = System.getProperty("user.name");
-        boolean ok = fileSystem.deleteDirectory(dirToDelete, user);
+    JOptionPane.showMessageDialog(
+            this,
+            "No se pudo eliminar el directorio.",
+            "Error",
+            JOptionPane.ERROR_MESSAGE
+    );
+}
 
-        if (ok) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Directorio eliminado correctamente.",
-                    "Éxito",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            dirToDelete = null;
-            treeManager.refresh();  // refrescamos el JTree
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No se pudo eliminar el directorio.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+
     }//GEN-LAST:event_delDirActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -859,17 +1004,49 @@ public class Admin extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
-        FileSystem loaded = FileSystem.loadState("FilesState.json");
+    JFileChooser chooser = new JFileChooser("versions/");
+    chooser.setDialogTitle("Selecciona la versión del sistema");
+    chooser.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
 
-    if (loaded != null) {
-        this.fileSystem = loaded;  // <--- ACTUALIZA TU SISTEMA
+    int result = chooser.showOpenDialog(this);
+
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = chooser.getSelectedFile();
+
+        FileSystem loaded = FileSystem.loadState(selectedFile.getAbsolutePath());
+        if (loaded != null) {
+        this.fileSystem = loaded;
+        treeManager.setFileSystem(loaded);   // <-- ACTUALIZA TREE MANAGER
         JOptionPane.showMessageDialog(this, "Versión cargada correctamente.");
+    } else {
+        JOptionPane.showMessageDialog(this, "Error cargando versión.");
+    }
     }
     }//GEN-LAST:event_jButton11ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        fileSystem.saveState("FilesState.json");
-        JOptionPane.showMessageDialog(this, "Versión guardada correctamente.");
+  
+        try {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String filename = "FilesState_" + timestamp + ".json";
+        fileSystem.saveState("versions/" + filename);
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Versión del sistema guardada correctamente.",
+                "Éxito",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(
+                this,
+                "Error al guardar el estado: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
+        e.printStackTrace();
+    }
     }//GEN-LAST:event_jButton5ActionPerformed
 
     /**

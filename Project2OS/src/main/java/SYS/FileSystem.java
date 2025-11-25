@@ -10,6 +10,7 @@ import Storage.Disk;
 import javax.swing.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.FileReader;
@@ -24,6 +25,16 @@ public class FileSystem {
     private Directory root;
     private Disk disk;
     private Audit audit;
+    private String lastLoadedJsonPath;
+    
+    
+    public void setLastLoadedJsonPath(String path) {
+        this.lastLoadedJsonPath = path;
+    }
+
+    public String getLastLoadedJsonPath() {
+        return this.lastLoadedJsonPath;
+    }
 
     public FileSystem(int sizeDisk, Audit audit) {
         this.disk = new Disk(sizeDisk);
@@ -226,9 +237,7 @@ public class FileSystem {
     }
     
     public static FileSystem loadState(String path) {
-
     try (FileReader reader = new FileReader(path)) {
-
         Gson gson = new Gson();
 
         JsonObject rootJson = JsonParser.parseReader(reader).getAsJsonObject();
@@ -241,32 +250,55 @@ public class FileSystem {
 
         Disk disk = new Disk(totalBlocks);
 
-        boolean[] busy = gson.fromJson(diskJson.get("busy"), boolean[].class);
-        disk.setBusy(busy);
+        // Cargar arreglo busy
+        if (diskJson.has("busy")) {
+            boolean[] busy = gson.fromJson(diskJson.get("busy"), boolean[].class);
+            disk.setBusy(busy);
+        }
 
-        JsonObject nextMap = diskJson.getAsJsonObject("next");
-        for (String key : nextMap.keySet()) {
-            int id = Integer.parseInt(key);
-            int next = nextMap.get(key).getAsInt();
-
-            if (next != -1) {
-                disk.getBlocks()[id].setNext(disk.getBlocks()[next]);
+        // Cargar bloques con next
+        if (diskJson.has("blocks")) {
+            JsonArray blocksJson = diskJson.getAsJsonArray("blocks");
+            for (JsonElement b : blocksJson) {
+                JsonObject blockObj = b.getAsJsonObject();
+                int id = blockObj.get("id").getAsInt();
+                int next = blockObj.get("next").getAsInt();
+                if (next != -1) {
+                    disk.getBlocks()[id].setNext(disk.getBlocks()[next]);
+                }
             }
+        } else if (diskJson.has("next")) {
+            JsonArray nextArray = diskJson.getAsJsonArray("next");
+            for (int i = 0; i < nextArray.size(); i++) {
+                int next = nextArray.get(i).getAsInt();
+                if (next != -1) {
+                    disk.getBlocks()[i].setNext(disk.getBlocks()[next]);
+                }
+            }
+        }
+
+        if (diskJson.has("headPosition")) {
+            disk.setHeadPosition(diskJson.get("headPosition").getAsInt());
         }
 
         // ============
         // 2. CARGAR AUDITORIA
         // ============
-        JsonObject auditJson = rootJson.getAsJsonObject("audit");
         LinkedList<String> logs = new LinkedList<>();
-        auditJson.getAsJsonArray("logs").forEach(log -> logs.add(log.getAsString()));
-
+        if (rootJson.has("auditLogs")) {
+            rootJson.getAsJsonArray("auditLogs").forEach(l -> logs.add(l.getAsString()));
+        }
         Audit audit = new Audit(logs);
 
         // ============
         // 3. CARGAR DIRECTORIOS Y ARCHIVOS
         // ============
-        Directory rootDir = loadDirectory(rootJson.getAsJsonObject("rootDirectory"), audit, disk, null);
+        JsonObject rootDirJson = rootJson.getAsJsonObject("rootDirectory");
+        if (rootDirJson == null) {
+            throw new RuntimeException("No se encontró 'rootDirectory' en el JSON");
+        }
+
+        Directory rootDir = loadDirectory(rootDirJson, audit, disk, null);
 
         // ============
         // 4. RECONSTRUIR FILESYSTEM COMPLETO
@@ -274,14 +306,18 @@ public class FileSystem {
         FileSystem fs = new FileSystem(totalBlocks, audit);
         fs.setDisk(disk);
         fs.setRoot(rootDir);
-
+        fs.setLastLoadedJsonPath(path);
+        
         return fs;
 
     } catch (Exception e) {
+        System.err.println("Error cargando FileSystem desde: " + path);
         e.printStackTrace();
         return null;
     }
 }
+
+
     private static Directory loadDirectory(JsonObject dirJson, Audit audit, Disk disk, Directory father) {
 
     Directory dir = new Directory(
@@ -405,7 +441,7 @@ public class FileSystem {
         // ======================
         // 4. GUARDAR ARCHIVO
         // ======================
-        FileWriter fw = new FileWriter(path);
+        FileWriter fw = new FileWriter(this.lastLoadedJsonPath,false);
         fw.write(gson.toJson(fsJson));
         fw.close();
 
