@@ -62,7 +62,7 @@ public class DiskScheduler {
 
     private void handleCreate(DiskRequest req) {
         fileSystem.addFile(
-                req.getFileName(),
+                req.getFileName().toUpperCase(),
                 req.getFileSize(),
                 req.getColor(),
                 req.getDir(),
