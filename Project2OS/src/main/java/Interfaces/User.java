@@ -26,7 +26,7 @@ public class User extends javax.swing.JFrame {
     private final AtomicInteger nextId = new AtomicInteger(1);
     private LinkedList<Process> processList;
     private Directory selectedDirectoryForCreate;
-
+    
     /**
      * Creates new form User
      */
@@ -57,8 +57,6 @@ public class User extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         createProcess = new javax.swing.JButton();
-        planningAlgorithm = new javax.swing.JComboBox<>();
-        jLabel8 = new javax.swing.JLabel();
         opComb = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
         archLoc = new javax.swing.JButton();
@@ -69,6 +67,8 @@ public class User extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         listP = new javax.swing.JPanel();
         jButton4 = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        planningAlgorithm = new javax.swing.JComboBox<>();
 
         jLabel2.setText("jLabel2");
 
@@ -100,16 +100,7 @@ public class User extends javax.swing.JFrame {
             }
         });
 
-        planningAlgorithm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FIFO", "SSTF", "SCAN", "C-SCAN" }));
-        planningAlgorithm.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                planningAlgorithmActionPerformed(evt);
-            }
-        });
-
-        jLabel8.setText("Políticas generadas:");
-
-        opComb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Leer", "Crear", "Actualizar", "Eliminar" }));
+        opComb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Leer", "Crear", "Eliminar" }));
         opComb.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 opCombActionPerformed(evt);
@@ -133,36 +124,26 @@ public class User extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel3)
+                        .addGap(53, 53, 53))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel9)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel3))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(diskSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(opComb, 0, 245, Short.MAX_VALUE)
-                                .addComponent(archName)))
-                        .addGap(355, 355, 355))))
-            .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(100, 100, 100)
-                        .addComponent(archLoc))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(123, 123, 123)
-                        .addComponent(createProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(createProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(archLoc)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(opComb, 0, 245, Short.MAX_VALUE)
+                        .addComponent(archName)
+                        .addComponent(diskSize)))
+                .addGap(355, 355, 355))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -181,13 +162,9 @@ public class User extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(diskSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addGap(21, 21, 21)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8))
                 .addGap(18, 18, 18)
                 .addComponent(createProcess)
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         listP.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Lista de procesos", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.TOP));
@@ -212,6 +189,15 @@ public class User extends javax.swing.JFrame {
             }
         });
 
+        jLabel8.setText("Políticas generadas:");
+
+        planningAlgorithm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FIFO", "SSTF", "SCAN", "C-SCAN" }));
+        planningAlgorithm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                planningAlgorithmActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -219,46 +205,50 @@ public class User extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(25, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton4)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 423, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(22, 22, 22))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(171, 171, 171))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(105, 105, 105))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(351, 351, 351))))
+                        .addGap(351, 351, 351))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(36, 36, 36)
+                        .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(141, 141, 141)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(115, 115, 115))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(11, 11, 11)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(28, 28, 28)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton4)))
+                .addGap(32, 32, 32)
                 .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton2)
+                    .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -269,7 +259,7 @@ public class User extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -283,8 +273,9 @@ public class User extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        treeManager.refresh();
-        treeManager.showTree();
+        openLiveTreeViewer();
+//        treeManager.refresh();
+//        treeManager.showTree();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void createProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createProcessActionPerformed
@@ -298,8 +289,8 @@ public class User extends javax.swing.JFrame {
             crearProcesoCreate();
         } else if (opStr.equalsIgnoreCase("Leer")) {
             crearProcesoRead();
-        } else if (opStr.equalsIgnoreCase("Actualizar")) {
-            crearProcesoUpdate();
+//        } else if (opStr.equalsIgnoreCase("Actualizar")) {
+//            crearProcesoUpdate();
         } else if (opStr.equalsIgnoreCase("Eliminar")) {
             crearProcesoDelete();
         }
@@ -332,7 +323,7 @@ public class User extends javax.swing.JFrame {
     }//GEN-LAST:event_planningAlgorithmActionPerformed
 
     private void archLocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_archLocActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here:        
         String op = (String) opComb.getSelectedItem();
         if (op == null || !op.equalsIgnoreCase("CREAR")) {
             JOptionPane.showMessageDialog(this,
@@ -480,52 +471,52 @@ public class User extends javax.swing.JFrame {
         });
     }
     
-    private void crearProcesoUpdate() {
-        String newName = archName.getText().trim().toUpperCase();
-        if (newName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingresa el nuevo nombre del archivo.");
-            return;
-        }
-
-        treeManager.openFileChooser((dir, file) -> {
-            if (dir == null || file == null) {
-                return;
-            }
-
-            int pid = nextId.getAndIncrement();
-            int block = file.getFirstBlock();
-
-            Process p = new Process(
-                    pid,
-                    "UPDATE_" + file.getName(),
-                    Process.OperationType.Update,
-                    block,
-                    file,
-                    Process.Status.Ready
-            );
-
-            // OJO: aquí usamos el constructor de DiskRequest de operaciones con file
-            DiskRequest req = new DiskRequest(
-                    p,
-                    DiskRequest.Type.Update,
-                    file,
-                    dir,
-                    block
-            );
-            // pero necesitamos que el DiskRequest sepa el nuevo nombre → seteamos el fileName:
-            req.setFileName(newName);
-
-            AppContext.DISK_SCHEDULER.submit(req);
-
-            JOptionPane.showMessageDialog(this,
-                    "Proceso de UPDATE creado para: " + file.getName()
-                    + "\nNuevo nombre: " + newName,
-                    "Proceso creado",
-                    JOptionPane.INFORMATION_MESSAGE);
-
-            refreshQueuePanel();
-        });
-    }
+//    private void crearProcesoUpdate() {
+//        String newName = archName.getText().trim().toUpperCase();
+//        if (newName.isEmpty()) {
+//            JOptionPane.showMessageDialog(this, "Ingresa el nuevo nombre del archivo.");
+//            return;
+//        }
+//
+//        treeManager.openFileChooser((dir, file) -> {
+//            if (dir == null || file == null) {
+//                return;
+//            }
+//
+//            int pid = nextId.getAndIncrement();
+//            int block = file.getFirstBlock();
+//
+//            Process p = new Process(
+//                    pid,
+//                    "UPDATE_" + file.getName(),
+//                    Process.OperationType.Update,
+//                    block,
+//                    file,
+//                    Process.Status.Ready
+//            );
+//
+//            // OJO: aquí usamos el constructor de DiskRequest de operaciones con file
+//            DiskRequest req = new DiskRequest(
+//                    p,
+//                    DiskRequest.Type.Update,
+//                    file,
+//                    dir,
+//                    block
+//            );
+//            // pero necesitamos que el DiskRequest sepa el nuevo nombre → seteamos el fileName:
+//            req.setFileName(newName);
+//
+//            AppContext.DISK_SCHEDULER.submit(req);
+//
+//            JOptionPane.showMessageDialog(this,
+//                    "Proceso de UPDATE creado para: " + file.getName()
+//                    + "\nNuevo nombre: " + newName,
+//                    "Proceso creado",
+//                    JOptionPane.INFORMATION_MESSAGE);
+//
+//            refreshQueuePanel();
+//        });
+//    }
     
     private void crearProcesoDelete() {
         treeManager.openFileChooser((dir, file) -> {
@@ -616,6 +607,24 @@ public class User extends javax.swing.JFrame {
                 + (file != null ? file : "<sin archivo>")
                 + " @ bloque " + req.getTargetBlock();
     }
+    
+    private void openLiveTreeViewer() {
+    TreeManager live = new TreeManager(AppContext.FILE_SYSTEM, true);
+
+    live.refresh();
+
+    JFrame f = live.showTree();
+
+    Timer t = new Timer(1000, e -> live.refresh());
+    t.start();
+
+    f.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosed(java.awt.event.WindowEvent e) {
+            t.stop();
+        }
+    });
+}
     
     /**
      * @param args the command line arguments
