@@ -3,10 +3,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package SYS;
+
 import Audit.Audit;
 import DS.LinkedList;
 import Storage.Block;
 import Storage.Disk;
+import Process.Process;
 import javax.swing.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -72,7 +74,8 @@ public class FileSystem {
                             int sizeBlocks,
                             String color,
                             String user,
-                            boolean isPublic) {
+                            boolean isPublic,
+                            Process pOwner) {
 
         if (!disk.getStorage(sizeBlocks)) {
             System.out.println("No hay espacio suficiente en el disco");
@@ -97,43 +100,77 @@ public class FileSystem {
             return null;
         }
 
-        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color, isPublic);
+        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color, isPublic, pOwner);
 
         targetDir.addFile(file, user);
 
         return file;
     }
     
-    public MyFile addFile(String name, int sizeBlocks, String color, Directory targetDir, String user, boolean isPublic) {
-        // Verificar espacio en el disco
-        if (!disk.getStorage(sizeBlocks)) {
-            System.out.println("No hay espacio suficiente en el disco");
-            JOptionPane.showMessageDialog(null,
-                    "No hay espacio suficiente en el disco",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
+//    public MyFile addFile(String name, int sizeBlocks, String color, Directory targetDir, String user, boolean isPublic) {
+//        // Verificar espacio en el disco
+//        if (!disk.getStorage(sizeBlocks)) {
+//            System.out.println("No hay espacio suficiente en el disco");
+//            JOptionPane.showMessageDialog(null,
+//                    "No hay espacio suficiente en el disco",
+//                    "Error", JOptionPane.ERROR_MESSAGE);
+//            return null;
+//        }
+//
+//        // Pedir al disco que asigne bloques encadenados
+//        int firstBlock = disk.asignBlocks(sizeBlocks);
+//        if (firstBlock == -1) {
+//            System.out.println("Fallo en asignación de bloques");
+//            JOptionPane.showMessageDialog(null,
+//                    "Error al asignar bloques en el disco",
+//                    "Error", JOptionPane.ERROR_MESSAGE);
+//            return null;
+//        }
+//
+//        // Crear el archivo
+//        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color, isPublic);
+//
+//        // Agregar el archivo al directorio y registrar en auditoría
+//        if (targetDir == null) {
+//            targetDir = root;
+//        }
+//        targetDir.addFile(file, user);
+//
+//        return file;
+//    }
+    
+    public MyFile addFile(String name, int size, String color,
+            Directory targetDir, String user, boolean isPublic,
+            Process pOwner) {
 
-        // Pedir al disco que asigne bloques encadenados
-        int firstBlock = disk.asignBlocks(sizeBlocks);
-        if (firstBlock == -1) {
-            System.out.println("Fallo en asignación de bloques");
-            JOptionPane.showMessageDialog(null,
-                    "Error al asignar bloques en el disco",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-
-        // Crear el archivo
-        MyFile file = new MyFile(name, sizeBlocks, firstBlock, color, isPublic);
-
-        // Agregar el archivo al directorio y registrar en auditoría
         if (targetDir == null) {
             targetDir = root;
         }
-        targetDir.addFile(file, user);
 
-        return file;
+        if (!disk.getStorage(size)) {
+            JOptionPane.showMessageDialog(null,
+                    "No hay espacio suficiente en el disco",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        int firstBlock = disk.asignBlocks(size);
+        if (firstBlock == -1) {
+            JOptionPane.showMessageDialog(null,
+                    "No se pudieron asignar bloques",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        MyFile f = new MyFile(name, size, firstBlock, color, isPublic, pOwner);
+
+        targetDir.addFile(f, user);
+        audit.registerOperation(user, "Se creó el archivo " + name
+                + " en " + targetDir.getRute());
+
+        return f;
     }
     
     public boolean deleteFile(Directory dir, MyFile file, String user) {

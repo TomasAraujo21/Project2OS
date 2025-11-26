@@ -33,21 +33,8 @@ public class Process extends Thread {
     private OperationType operation;
     private int diskPosition = 0;
     private MyFile targetFile;
-//    private Integer cyclesToExcept;
-//    private Integer cyclesToCompleteRequest;
     private Status status;
 
-
-//    public Process(Integer ID, String processName, Integer instructionCount, OperationType operation, String path, Integer cyclesToExcept, Integer cyclesToCompleteRequest, Status status) {
-//        this.ID = ID;
-//        this.processName = processName;
-//        this.instructionCount = instructionCount;
-//        this.operation = operation;
-//        this.path = path;
-//        this.cyclesToExcept = cyclesToExcept;
-//        this.cyclesToCompleteRequest = cyclesToCompleteRequest;
-//        this.status = status.Ready;
-//    }
     
     public Process(Integer ID, String processName, OperationType operation, int diskPosition, MyFile targetFile, Status status) {
         this.ID = ID;
@@ -73,22 +60,6 @@ public class Process extends Thread {
     public void setProcessName(String processName) {
         this.processName = processName;
     }
-
-//    public Integer getCyclesToExcept() {
-//        return cyclesToExcept;
-//    }
-//
-//    public void setCyclesToExcept(Integer cyclesToExcept) {
-//        this.cyclesToExcept = cyclesToExcept;
-//    }
-//
-//    public Integer getCyclesToCompleteRequest() {
-//        return cyclesToCompleteRequest;
-//    }
-//
-//    public void setCyclesToCompleteRequest(Integer cyclesToCompleteRequest) {
-//        this.cyclesToCompleteRequest = cyclesToCompleteRequest;
-//    }
 
     public Status getStatus() {
         return status;

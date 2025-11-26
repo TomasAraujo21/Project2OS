@@ -4,6 +4,8 @@
  */
 package SYS;
 
+import Process.Process;
+
 /**
  *
  * @author Gabriel Flores
@@ -14,6 +16,7 @@ public class MyFile {
     private int firstBlock;
     private String color;
     private boolean isPublic;
+    private Process pOwner;
 
     public MyFile(String name, int size, int firstBlock, String color, boolean isPublic) {
         this.name = name;
@@ -21,6 +24,15 @@ public class MyFile {
         this.firstBlock = firstBlock;
         this.color = color;
         this.isPublic = isPublic;
+    }
+    
+    public MyFile(String name, int size, int firstBlock, String color, boolean isPublic, Process pOwner) {
+        this.name = name;
+        this.size = size;
+        this.firstBlock = firstBlock;
+        this.color = color;
+        this.isPublic = isPublic;
+        this.pOwner = pOwner;
     }
 
     public String getName() {
@@ -61,6 +73,14 @@ public class MyFile {
 
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    public Process getpOwner() {
+        return pOwner;
+    }
+
+    public void setpOwner(Process pOwner) {
+        this.pOwner = pOwner;
     }
       
     @Override
