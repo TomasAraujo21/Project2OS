@@ -72,14 +72,16 @@ public class DiskScheduler {
     }
 
     private void handleCreate(DiskRequest req) {
-        fileSystem.addFile(
-                req.getFileName().toUpperCase(),
-                req.getFileSize(),
-                req.getColor(),
-                req.getDir(),
-                "Proceso",
-                true
-        );
+//        fileSystem.addFile(
+//                req.getFileName().toUpperCase(),
+//                req.getFileSize(),
+//                req.getColor(),
+//                req.getDir(),
+//                "Proceso",
+//                true,
+//                req.getProcess()
+//        );
+        fileSystem.createFile(req.getDir(), req.getFileName().toUpperCase(), req.getFileSize(), req.getColor(), "Usuario", true, req.getProcess());
     }
 
     private void handleRead(DiskRequest req) {

@@ -376,6 +376,12 @@ public class User extends javax.swing.JFrame {
     }
     
     private void crearProcesoCreate() {
+        // Abrimos el chooser de archivo
+        treeManager.openDirectoryChooser((dir) -> {
+            if (dir == null) {
+                dir = fileSystem.getRoot();
+            }
+            
         String name = archName.getText().trim().toUpperCase();
         if (name.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Ingresa un nombre de archivo.");
@@ -394,13 +400,8 @@ public class User extends javax.swing.JFrame {
             return;
         }
 
-        // por ahora, digamos que todos los archivos creados por usuario son privados:
-        boolean isPublic = false;  // cuando creas el archivo real lo pasas a addFile
+        boolean isPublic = true;
 
-        Directory dir = selectedDirectoryForCreate;
-        if (dir == null) {
-            dir = fileSystem.getRoot();
-        }
 
         // Creamos el Process lógico
         int pID = nextId.getAndIncrement();
@@ -408,19 +409,18 @@ public class User extends javax.swing.JFrame {
                 pID,
                 "CREATE_" + name,
                 Process.OperationType.Create,
-                0, // diskPosition: para CREATE puedes dejar 0
-                null, // targetFile: todavía no existe
+                0,
+                null,
                 Process.Status.Ready
         );
 
-        // DiskRequest para CREATE: targetBlock lo ponemos 0 (no importa mucho en FIFO)
         DiskRequest req = new DiskRequest(
                 p,
                 archName.getText(),
                 size,
                 "Azul",
                 dir,
-                0 // targetBlock
+                0
         );
 
         AppContext.DISK_SCHEDULER.submit(req);
@@ -431,6 +431,10 @@ public class User extends javax.swing.JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
 
         refreshQueuePanel();
+        archName.setText("");
+        diskSize.setValue(1);
+        
+        });
     }
     
     private void crearProcesoRead() {
@@ -457,7 +461,7 @@ public class User extends javax.swing.JFrame {
                     DiskRequest.Type.Read,
                     file,
                     dir,
-                    block // targetBlock = primer bloque del archivo
+                    file.getFirstBlock() // targetBlock = primer bloque del archivo
             );
 
             AppContext.DISK_SCHEDULER.submit(req);

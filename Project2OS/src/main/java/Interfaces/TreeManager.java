@@ -27,7 +27,6 @@ public class TreeManager {
     private Directory selectedFileDirectory = null;
     private boolean showPrivFiles;
     
-    private JFrame treeWindow = null;   // NUEVO
 
     public void setFileSystem(FileSystem fileSystem) {
         this.fileSystem = fileSystem;
@@ -42,7 +41,6 @@ public class TreeManager {
     public void buildTree() {
         Directory rootDir = fileSystem.getRoot();
 
-        // CAMBIO: seguimos usando el Directory como userObject
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(rootDir);
 
         buildSubtree(rootNode, rootDir);

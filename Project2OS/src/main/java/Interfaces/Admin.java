@@ -566,7 +566,7 @@ public class Admin extends javax.swing.JFrame {
         
         boolean isPublic = level.equals("Publico");
 
-        MyFile file = fileSystem.addFile(name, size, color, target, user, isPublic);
+        MyFile file = fileSystem.addFile(name, size, color, target, user, isPublic, null);
 
         if (file != null) {
             JOptionPane.showMessageDialog(this,

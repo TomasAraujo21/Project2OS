@@ -6,6 +6,7 @@ package Interfaces;
 
 import SYS.*;
 import DS.*;
+import Process.Process;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -66,13 +67,21 @@ public class FilesTable extends JFrame {
 
         while (fileNode != null) {
             MyFile f = fileNode.getData();
+            
+            String creador;
+            Process creatorProcess = f.getpOwner();
+            if (creatorProcess != null) {
+                creador = creatorProcess.getProcessName() + " (PID " + creatorProcess.getID() + ")";
+            } else {
+                creador = "ADMIN / N/A";  // archivos creados fuera de un proceso
+            }
 
             model.addRow(new Object[]{
                     f.getName(),
                     f.getSize(),
                     f.getFirstBlock(),
-                    f.getColor(),         // Se usa el renderer para mostrar el color
-                    ""                    // Proceso creador (futuro)
+                    f.getColor(),         
+                    creador                    
             });
 
             fileNode = fileNode.getNext();
