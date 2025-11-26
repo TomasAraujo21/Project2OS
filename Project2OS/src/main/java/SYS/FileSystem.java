@@ -387,45 +387,39 @@ public class FileSystem {
 
     return dir;
 }
-    private JsonObject serializeDirectoryGson(Directory dir) {
+    public JsonObject serializeDirectoryGson(Directory dir) {
 
     JsonObject obj = new JsonObject();
     obj.addProperty("name", dir.getName());
 
     // ======== FILES ========
     JsonArray filesArray = new JsonArray();
-    var fileNode = dir.getFiles().getHead();
-
-    while (fileNode != null) {
-        MyFile f = fileNode.getData();
-        JsonObject fJson = new JsonObject();
-
-        fJson.addProperty("name", f.getName());
-        fJson.addProperty("size", f.getSize());
-        fJson.addProperty("firstBlock", f.getFirstBlock());
-        fJson.addProperty("color", f.getColor());
-        fJson.addProperty("isPublic", f.isIsPublic());
-
-        filesArray.add(fJson);
-        fileNode = fileNode.getNext();
+    if (dir.getFiles() != null) {
+        for (MyFile f : dir.getFiles()) {
+            JsonObject fJson = new JsonObject();
+            fJson.addProperty("name", f.getName());
+            fJson.addProperty("size", f.getSize());
+            fJson.addProperty("firstBlock", f.getFirstBlock());
+            fJson.addProperty("color", f.getColor());
+            fJson.addProperty("isPublic", f.isIsPublic());
+            filesArray.add(fJson);
+        }
     }
-
     obj.add("files", filesArray);
 
     // ======== SUBDIRECTORIES ========
     JsonArray dirArray = new JsonArray();
-    var dirNode = dir.getSubdirectories().getHead();
-
-    while (dirNode != null) {
-        Directory sub = dirNode.getData();
-        dirArray.add(serializeDirectoryGson(sub));
-        dirNode = dirNode.getNext();
+    if (dir.getSubdirectories() != null) {
+        for (Directory sub : dir.getSubdirectories()) {
+            dirArray.add(serializeDirectoryGson(sub));
+        }
     }
-
     obj.add("subdirectories", dirArray);
 
     return obj;
 }
+
+     
 
     
     
@@ -478,10 +472,10 @@ public class FileSystem {
         // ======================
         // 4. GUARDAR ARCHIVO
         // ======================
-        FileWriter fw = new FileWriter(this.lastLoadedJsonPath,false);
+        FileWriter fw = new FileWriter(path,false);
         fw.write(gson.toJson(fsJson));
         fw.close();
-
+        this.lastLoadedJsonPath = path;
         System.out.println("[SAVE] Sistema guardado correctamente.");
 
     } catch (Exception e) {
@@ -490,7 +484,61 @@ public class FileSystem {
     }
 }
 
+    public void saveVersion(String path) {
+        try {
+            Gson gson = new Gson();
 
+            JsonObject fsJson = serializeFullFileSystem();
 
+            FileWriter fw = new FileWriter(path, false);
+            fw.write(gson.toJson(fsJson));
+            fw.close();
+
+            System.out.println("[SAVE VERSION] Versión guardada correctamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private JsonObject serializeFullFileSystem() {
+    Gson gson = new Gson();
+    JsonObject fsJson = new JsonObject();
+
+    // disco
+    JsonObject diskJson = new JsonObject();
+    diskJson.addProperty("totalBlocks", disk.getTotalBlocks());
+    diskJson.add("busy", gson.toJsonTree(disk.getBusy()));
+
+    JsonArray nextArray = new JsonArray();
+    for (Block b : disk.getBlocks()) {
+        nextArray.add(b.getNext() == null ? -1 : b.getNext().getId());
+    }
+    diskJson.add("next", nextArray);
+    fsJson.add("disk", diskJson);
+
+    // auditoría
+    JsonArray logs = new JsonArray();
+    var logNode = audit.getrLogs().getHead();
+    while (logNode != null) {
+        logs.add(logNode.getData());
+        logNode = logNode.getNext();
+    }
+    JsonObject auditJson = new JsonObject();
+    auditJson.add("logs", logs);
+    fsJson.add("audit", auditJson);
+
+    // directorios
+    fsJson.add("rootDirectory", serializeDirectoryGson(root));
+
+    return fsJson;
+}
+    
+    public void saveStateToLastLoaded() {
+    if (this.lastLoadedJsonPath == null || this.lastLoadedJsonPath.isEmpty()) {
+        System.err.println("[SAVE] No hay JSON cargado para sobrescribir.");
+        return;
+    }
+    saveState(this.lastLoadedJsonPath);
+}
 
 }

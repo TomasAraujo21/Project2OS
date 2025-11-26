@@ -3,12 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package DS;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  *
  * @author Gabriel Flores
  */
-public class LinkedList<T> {
+public class LinkedList<T> implements Iterable<T> {
     private Node<T> head;
     private int size;
     
@@ -117,5 +119,25 @@ public class LinkedList<T> {
     public void clean(){
         head = null;
         size = 0;
+    }
+    
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private Node<T> current = head;
+
+            @Override
+            public boolean hasNext() {
+                return current != null;
+            }
+
+            @Override
+            public T next() {
+                if(current == null) throw new NoSuchElementException();
+                T data = current.getData();
+                current = current.next;
+                return data;
+            }
+        };
     }
 }

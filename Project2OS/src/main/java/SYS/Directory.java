@@ -18,6 +18,7 @@ public class Directory {
     private Disk refDisk; 
     private Audit refAudit;
     private transient Directory father;
+    private String jsonFilePath;
 
     public Directory(String name, Audit refAudit, Directory father, Disk refDisk) {
         this.name = name;
@@ -118,6 +119,16 @@ public class Directory {
     public void setFather(Directory father) {
         this.father = father;
     }
+
+    public String getJsonFilePath() {
+        return jsonFilePath;
+    }
+
+    public void setJsonFilePath(String jsonFilePath) {
+        this.jsonFilePath = jsonFilePath;
+    }
+    
+    
     
     @Override
     public String toString() {

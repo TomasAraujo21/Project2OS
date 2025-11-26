@@ -569,6 +569,9 @@ public class Admin extends javax.swing.JFrame {
         MyFile file = fileSystem.addFile(name, size, color, target, user, isPublic, null);
 
         if (file != null) {
+            if (fileSystem.getLastLoadedJsonPath() != null) {
+        fileSystem.saveState(fileSystem.getLastLoadedJsonPath());
+    }
             JOptionPane.showMessageDialog(this,
                     "Archivo creado correctamente",
                     "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -636,9 +639,10 @@ public class Admin extends javax.swing.JFrame {
 
         // Renombrar en memoria
         file.setName(newName);
+        if (fileSystem.getLastLoadedJsonPath() != null) {
+        fileSystem.saveState(fileSystem.getLastLoadedJsonPath());
+    }
 
-        // Guardar cambios en el MISMO JSON
-        fileSystem.saveState("");
 
         JOptionPane.showMessageDialog(
                 this,
@@ -656,13 +660,10 @@ public class Admin extends javax.swing.JFrame {
 
     private void updDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updDirActionPerformed
         String newName = newDirectoryName.getText().toUpperCase().strip();
-        if (newName.isEmpty()) {
-            // Validación para que el nombre no sea vacío.
-            javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
-            return;
-        }
-        treeManager.openDirectoryChooser(dir -> {
-        if (dir == null) {
+
+treeManager.openDirectoryChooser(dir -> {
+
+    if (dir == null) {
         JOptionPane.showMessageDialog(
                 this,
                 "Primero selecciona un directorio.",
@@ -672,62 +673,45 @@ public class Admin extends javax.swing.JFrame {
         return;
     }
 
-    // Validar que no exista otro directorio con el mismo nombre en la misma carpeta padre
-    Directory parent = dir.getFather(); // suponiendo que tienes getFather()
-    if (parent != null) {
-        Object subsObj = parent.getSubdirectories();
-        boolean nameExists = false;
-
-        if (subsObj instanceof Directory[]) {
-            for (Directory d : (Directory[]) subsObj) {
-                if (d.getName().equalsIgnoreCase(newName)) {
-                    nameExists = true;
-                    break;
-                }
+    Directory parent = dir.getFather();
+    if (parent != null && parent.getSubdirectories() != null) {
+        for (Directory d : parent.getSubdirectories()) {
+            // NO comparar contra sí mismo
+            if (d != dir && d.getName().equalsIgnoreCase(newName)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Ya existe un directorio con ese nombre en esta carpeta.",
+                        "Nombre duplicado",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
             }
-        } else if (subsObj instanceof java.util.Collection<?>) {
-            for (Object o : (java.util.Collection<?>) subsObj) {
-                if (o instanceof Directory d && d.getName().equalsIgnoreCase(newName)) {
-                    nameExists = true;
-                    break;
-                }
-            }
-        }
-
-        if (nameExists) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Ya existe un directorio con ese nombre en esta carpeta.",
-                    "Nombre duplicado",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
         }
     }
-    dir.setName(newName); // renombrar en memoria
 
-    // Guardar en el JSON que contiene este directorio
+    // Renombrar
+    dir.setName(newName);
+
+    // Guardar en el mismo JSON que contiene el directorio
     Gson gson = new Gson();
-//    JsonObject dirJson = serializeDirectoryGson(dir);
-//    String jsonPath = dir.getJsonPath(); // asegurarse de que Directory tiene un atributo con la ruta del JSON
-//    if (jsonPath == null || jsonPath.isEmpty()) {
-//    JOptionPane.showMessageDialog(this, "No se encontró el archivo JSON del directorio.", "Error", JOptionPane.ERROR_MESSAGE);
-//    return;
-//}
-
-//try (FileWriter fw = new FileWriter(jsonPath, false)) {
-//    fw.write(gson.toJson(dirJson));
-//} catch (Exception e) {
-//    e.printStackTrace();
-//    JOptionPane.showMessageDialog(this, "Error guardando el directorio.", "Error", JOptionPane.ERROR_MESSAGE);
-//    return;
-//}
-
-    JOptionPane.showMessageDialog(this, "Directorio renombrado correctamente a:\n" + newName, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    JsonObject dirJson = fileSystem.serializeDirectoryGson(dir);
+    try (FileWriter fw = new FileWriter(dir.getJsonFilePath(), false)) {
+        fw.write(gson.toJson(dirJson));
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(
+            this,
+            "Directorio renombrado correctamente a:\n" + newName,
+            "Éxito",
+            JOptionPane.INFORMATION_MESSAGE
+    );
+        return;
+    }
 
     newDirectoryName.setText("");
     treeManager.refresh();
-        });
+});
+
     }//GEN-LAST:event_updDirActionPerformed
 
     private void newDirectoryNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newDirectoryNameActionPerformed
