@@ -26,6 +26,8 @@ public class TreeManager {
     private MyFile selectedFile = null;                    
     private Directory selectedFileDirectory = null;
     private boolean showPrivFiles;
+    
+    private JFrame treeWindow = null;   // NUEVO
 
     public void setFileSystem(FileSystem fileSystem) {
         this.fileSystem = fileSystem;
@@ -70,7 +72,6 @@ public class TreeManager {
 
                 Object userObj = node.getUserObject();
 
-                // CAMBIO: ahora distinguimos entre directorio y archivo
                 if (userObj instanceof Directory) {
                     selectedDirectory = (Directory) userObj;
                     selectedFile = null;
@@ -79,7 +80,6 @@ public class TreeManager {
                 } else if (userObj instanceof MyFile) {
                     selectedFile = (MyFile) userObj;
 
-                    // buscamos el padre para saber en qué directorio está este archivo
                     DefaultMutableTreeNode parent =
                             (DefaultMutableTreeNode) node.getParent();
 
@@ -89,7 +89,6 @@ public class TreeManager {
                         selectedFileDirectory = null;
                     }
 
-                    // al seleccionar un archivo no nos interesa el selectedDirectory "normal"
                     selectedDirectory = null;
                 } else {
                     selectedDirectory = null;
@@ -124,11 +123,39 @@ public class TreeManager {
         }
     }
 
+//    public void refresh() {
+//        buildTree();
+//    }
+    
     public void refresh() {
-        buildTree();
+        Directory rootDir = fileSystem.getRoot();
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(rootDir);
+
+        buildSubtree(rootNode, rootDir);
+
+        // reconstruir modelo COMPLETO
+        model = new DefaultTreeModel(rootNode);
+        tree.setModel(model);
+
+        model.reload();
     }
 
-    public void showTree() {
+//    public void showTree() {
+//        if (model == null) {
+//            buildTree();
+//        }
+//
+//        JFrame frame = new JFrame("Explorador de Directorios");
+//        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//        frame.setSize(400, 500);
+//
+//        frame.add(new JScrollPane(tree));
+//
+//        frame.setLocationRelativeTo(null);
+//        frame.setVisible(true);
+//    }
+    
+    public JFrame showTree() {
         if (model == null) {
             buildTree();
         }
@@ -137,10 +164,13 @@ public class TreeManager {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(400, 500);
 
-        frame.add(new JScrollPane(tree));
+        JScrollPane scrollPane = new JScrollPane(tree);
+        frame.add(scrollPane);
 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        return frame;
     }
 
     public Directory getSelectedDirectory() {
