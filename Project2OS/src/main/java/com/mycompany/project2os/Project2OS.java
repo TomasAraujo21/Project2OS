@@ -3,6 +3,7 @@
  */
 
 package com.mycompany.project2os;
+import Interfaces.MainFrame;
 
 /**
  *
@@ -11,6 +12,7 @@ package com.mycompany.project2os;
 public class Project2OS {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        MainFrame main = new MainFrame();
+        main.setVisible(true);
     }
 }
